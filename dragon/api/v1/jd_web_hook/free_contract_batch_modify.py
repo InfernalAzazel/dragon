@@ -11,8 +11,8 @@ doc = '''
 
 '''
 
-# 人员档案 测试
-personnel_files_form = JdAPI(JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, '60dd66039c80b600081529d2')
+# 人员档案
+personnel_files_form = JdAPI(JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, '5df7a704c75c0e00061de8f6')
 
 
 def register(router: APIRouter):
@@ -73,14 +73,13 @@ async def business(whi):
                 },
                 # 无忧纸质资料回收情况
                 'free_data_recycling': {
-                    'value': whi.data['free_contract_expire']
+                    'value': whi.data['free_data_recycling']
                 },
                 # 无忧合同签订情况
                 'signing_status': {
                     'value': subform['signing_status']['value']
                 },
             }
-            print(data)
             await personnel_files_form.update_data(
                 dataId=res[0]['_id'],
                 data=data
