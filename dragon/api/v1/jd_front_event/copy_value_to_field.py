@@ -3,7 +3,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Request, Header
 from pydantic import BaseModel, Field
 
-from utils import JdAPI
+import settings
 
 
 class Item(BaseModel):
@@ -29,7 +29,7 @@ def register(router: APIRouter):
     @router.post('/copy_value_to_field', tags=['复制一个字段到另一个字段'], description=doc)
     async def copy_value_to_field(item: Item, token: Optional[str] = Header(None)):
 
-        if token != JdAPI.TOKEN:
+        if token != settings.Default.DRAGON_TOKEN:
             return 'fail', 401
 
         outs = {}

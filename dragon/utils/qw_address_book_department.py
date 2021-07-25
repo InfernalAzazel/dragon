@@ -55,7 +55,7 @@ class QWAddressBookDepartment:
     def __init__(self):
         self.qwAPI = QWAPI()
         # 简道云 -> 客户档案
-        self.jd_customer_profile_form = JdAPI(JdAPI.APP_ID_BUSINESS, '60d17f4823b1710007f0c3c6')
+        self.jd_customer_profile_form = JdAPI(JdAPI.APP_ID_BUSINESS, '5dd102e307747e0006801bee')
         # 简道云 -> 人员档案
         self.personnel_files_form = JdAPI(JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, '5df7a704c75c0e00061de8f6')
         # 简道云 -> 企业微信部门变动表

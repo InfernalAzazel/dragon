@@ -1,8 +1,8 @@
 from typing import Optional, List
 
-from dragon_micro_client import MicroClientConfig, AsyJDAPI
 from fastapi import APIRouter, Request, Header
 from pydantic import BaseModel, Field
+from dragon_micro_client import AsyJDAPI, MicroClientConfig
 
 import settings
 from utils import JdAPI
@@ -13,14 +13,14 @@ class Item(BaseModel):
 
 
 doc = '''
-   获取活动已延期计数
+   获取活动已延期累计
 
 '''
 
 
 def register(router: APIRouter):
-    @router.post('/activity-postponed-count', tags=['活动延期申请-获取活动已延期计数'], description=doc)
-    async def activity_postponed_count(item: Item, token: Optional[str] = Header(None)):
+    @router.post('/activity-postponed-add', tags=['活动延期申请-获取活动已延期累计'], description=doc)
+    async def activity_postponed_add(item: Item, token: Optional[str] = Header(None)):
         if token != settings.Default.DRAGON_TOKEN:
             return 'fail', 401
 
@@ -52,6 +52,6 @@ def register(router: APIRouter):
             if res:
                 for i in range(len(res)):
                     if res[i]['flowState'] == 1:
-                        n = n + 1
-                return {'count': n}
-        return {'count': 0}
+                        n = n + res[i]['delay_count']
+                return {'add': n}
+        return {'add': 0}

@@ -26,8 +26,7 @@ app = create_app()
 
 @app.on_event('startup')
 async def startup():
-    # await test()
-    TaskList.register()
+   pass
 
 
 def main():
