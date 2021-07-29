@@ -28,6 +28,8 @@ jd_web_hook.outside_b_r_wages_new.register(jd_web_hook_router)
 jd_web_hook.quality_monitor_plan_launch.register(jd_web_hook_router)
 jd_web_hook.quality_monitor_plan_launch2.register(jd_web_hook_router)
 jd_web_hook.b_r_net_growth_reward.register(jd_web_hook_router)
+# jd_web_hook.cpw_modify_apply.register(jd_web_hook_router)
+jd_web_hook.leave_apply.register(jd_web_hook_router)
 
 # 注册 u8
 u8.product_ret_goods_apply.register(u8_router)

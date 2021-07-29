@@ -1,6 +1,4 @@
 import time
-
-import loguru
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 

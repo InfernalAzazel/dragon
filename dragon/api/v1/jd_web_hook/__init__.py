@@ -12,3 +12,5 @@ from api.v1.jd_web_hook import outside_b_r_wages
 from api.v1.jd_web_hook import quality_monitor_plan_launch
 from api.v1.jd_web_hook import quality_monitor_plan_launch2
 from api.v1.jd_web_hook import b_r_net_growth_reward
+from api.v1.jd_web_hook import cpw_modify_apply
+from api.v1.jd_web_hook import leave_apply
