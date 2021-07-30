@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, BackgroundTasks
 from api.v1.jd_web_hook.models import WebHookItem
-from utils.jd_api import JdAPI
+from conf import Settings, Micro
+from dragon_micro_client import AsyJDAPI
 
 doc = '''
 
@@ -15,7 +16,7 @@ def register(router: APIRouter):
     @router.post('/product-ret-goods-apply', tags=['产品退货申请单-u8'], description=doc)
     async def product_ret_goods_apply(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):

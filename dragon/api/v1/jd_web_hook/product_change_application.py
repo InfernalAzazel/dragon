@@ -4,9 +4,10 @@ from api.v1.jd_web_hook.models import WebHookItem
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
-from utils import JdType, Mgo
+from utils import Mgo
 from utils.dragon_logger import DragonLogger
-from utils.jd_api import JdAPI
+from dragon_micro_client import AsyJDAPI,JDSerialize
+from conf import Settings, Micro
 
 doc = '''
     
@@ -25,21 +26,13 @@ business_name = 'product_change_application'
 db_name = 'blue-jd'  # 简道云数据库
 coll_name = 'query-cache'  # 查询缓存
 
-# 新增或修改产品信息申请
-product_change_application_table = JdAPI(app_id=JdAPI.APP_ID_BUSINESS, entry_id='5e38e4dffe24c90006f3ec37')
-
-#  客户档案
-customer_profile = JdAPI(app_id=JdAPI.APP_ID_BUSINESS, entry_id='5dd102e307747e0006801bee')
-
-#  客户销售产品过渡表
-customer_sales_product_table = JdAPI(app_id=JdAPI.APP_ID_BUSINESS, entry_id='5de228733b001e000659af62')
-
 
 def register(router: APIRouter):
     @router.post('/product-change-application', tags=['新增或修改产品信息申请'], description=doc)
     async def product_change_application(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -59,6 +52,30 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
         count = await Mgo(db_name=db_name, coll_name=coll_name).count({'data_id': whi.data['_id']})
+
+        # 新增或修改产品信息申请
+        product_change_application_table = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_BUSINESS,
+            entry_id='5e38e4dffe24c90006f3ec37',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
+
+        #  客户档案
+        customer_profile = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_BUSINESS,
+            entry_id='5dd102e307747e0006801bee',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
+
+        #  客户销售产品过渡表
+        customer_sales_product_table = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_BUSINESS,
+            entry_id='5de228733b001e000659af62',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
 
         if count > 0:
             await DragonLogger.warn(
@@ -165,7 +182,7 @@ async def business(whi):
             if not cpp_subform:
                 await customer_profile.update_data(
                     dataId=result[ii]['_id'],
-                    data=JdType.subform(subform_field=customer_profile_product_subform_field,
+                    data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
                                         data=whi_data_subform))
             else:
 
@@ -193,7 +210,7 @@ async def business(whi):
 
                 await customer_profile.update_data(
                     dataId=result[ii]['_id'],
-                    data=JdType.subform(subform_field=customer_profile_product_subform_field,
+                    data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
                                         data=cpp_subform))
 
         # ====================================================================================================

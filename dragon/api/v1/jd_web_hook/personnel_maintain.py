@@ -5,7 +5,8 @@ from loguru import logger
 from api.v1.jd_web_hook.models import WebHookItem
 from utils import Mgo
 from utils.dragon_logger import DragonLogger
-from utils.jd_api import JdAPI
+from conf import Settings, Micro
+from dragon_micro_client import AsyJDAPI
 
 doc = '''
     入职申请表-人员维护
@@ -19,17 +20,13 @@ business_name = 'personnel-maintain'
 db_name = 'blue-jd'  # 简道云数据库
 coll_name = 'query-cache'  # 查询缓存
 
-# 人员维护表单
-personnel_maintain_form = JdAPI(JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, '5df87216281aa4000604af2e')
-# 入职申请表单
-entry_apply_form = JdAPI(JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, '5df73f5ca667c000067cd60c')
-
 
 def register(router: APIRouter):
     @router.post('/personnel-maintain', tags=['入职申请表-人员维护'], description=doc)
     async def personnel_maintain(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -58,6 +55,22 @@ async def business(whi):
             return
 
         await Mgo(db_name=db_name, coll_name=coll_name).insert_one({'data_id': whi.data['_id']})
+
+        # 人员维护表单
+        personnel_maintain_form = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+            entry_id='5df87216281aa4000604af2e',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
+
+        # 入职申请表单
+        entry_apply_form = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+            entry_id='5df73f5ca667c000067cd60c',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
 
         # 创建数据
         await personnel_maintain_form.create_data(data={

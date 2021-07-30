@@ -4,7 +4,8 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from api.v1.jd_web_hook.models import WebHookItem
-from utils.jd_api import JdAPI
+from conf import Settings, Micro
+from dragon_micro_client import AsyJDAPI
 
 doc = '''
 
@@ -21,15 +22,14 @@ doc = '''
         身份证号码 
         
 '''
-# 入职申请表单
-entry_application_form = JdAPI(app_id=JdAPI.APP_ID_MINISTRY_OF_PERSONNEL, entry_id='5df73f5ca667c000067cd60c')  # 上线
 
 
 def register(router: APIRouter):
     @router.post('/entry_application/verify-field', tags=['入职申请表单-校验字段重复'], description=doc)
     async def entry_application_verify_field(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -45,6 +45,13 @@ def register(router: APIRouter):
 async def business(whi):
     # 启动时间
     start = time.perf_counter()
+    # 入职申请表单
+    entry_application_form = AsyJDAPI(
+        app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+        entry_id='5df73f5ca667c000067cd60c',
+        api_key=Settings.JD_API_KEY,
+        mcc=Micro.mcc
+    )  # 上线
 
     widgets = await entry_application_form.get_form_widgets()
 

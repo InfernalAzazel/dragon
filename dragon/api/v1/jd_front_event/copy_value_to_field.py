@@ -1,9 +1,9 @@
-from typing import Optional, List
+from typing import Optional
 
-from fastapi import APIRouter, Request, Header
+from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 
-import settings
+from conf import Settings
 
 
 class Item(BaseModel):
@@ -29,7 +29,7 @@ def register(router: APIRouter):
     @router.post('/copy_value_to_field', tags=['复制一个字段到另一个字段'], description=doc)
     async def copy_value_to_field(item: Item, token: Optional[str] = Header(None)):
 
-        if token != settings.Default.DRAGON_TOKEN:
+        if token != Settings.DRAGON_TOKEN:
             return 'fail', 401
 
         outs = {}

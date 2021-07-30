@@ -4,7 +4,7 @@ from dragon_micro_client import MicroClientConfig, AsyJDAPI
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
-import settings
+from conf import Settings, Micro
 from api.v1.jd_web_hook.models import WebHookItem
 
 doc = '''
@@ -19,7 +19,7 @@ def register(router: APIRouter):
     async def quality_monitor_plan_launch(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
-                secret=settings.Default.JD_SECRET,
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -34,18 +34,12 @@ def register(router: APIRouter):
 async def business(whi: WebHookItem):
     # 启动时间
     start = time.perf_counter()
-    # print(whi.data)
-    # 配置腾龙微服务
-    mcc = MicroClientConfig(
-        mcc_url=settings.Default.MCC_BASIC_URL,
-        token=settings.Default.MCC_BASIC_TOKEN
-    )
     # 异步模式-使用简道云接口 单表单
     asy_jd = AsyJDAPI(
-        app_id=settings.Default.JD_APP_ID_QUALITY,
+        app_id=Settings.JD_APP_ID_QUALITY,
         entry_id='60f28718598cae0008105cae',
-        api_key=settings.Default.JD_API_KEY,
-        mcc=mcc
+        api_key=Settings.JD_API_KEY,
+        mcc=Micro.mcc
     )
     await asy_jd.query_update_data_one(
         data_filter={

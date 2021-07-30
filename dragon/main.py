@@ -2,7 +2,6 @@ import uvicorn
 from fastapi import FastAPI
 
 import router.v1.index
-from task.v1.task_list import TaskList
 
 
 def create_app():

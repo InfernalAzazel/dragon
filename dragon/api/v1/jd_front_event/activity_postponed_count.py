@@ -1,11 +1,10 @@
-from typing import Optional, List
+from typing import Optional
 
-from dragon_micro_client import MicroClientConfig, AsyJDAPI
-from fastapi import APIRouter, Request, Header
+from dragon_micro_client import AsyJDAPI
+from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 
-import settings
-from utils import JdAPI
+from conf import Settings, Micro
 
 
 class Item(BaseModel):
@@ -21,21 +20,17 @@ doc = '''
 def register(router: APIRouter):
     @router.post('/activity-postponed-count', tags=['活动延期申请-获取活动已延期计数'], description=doc)
     async def activity_postponed_count(item: Item, token: Optional[str] = Header(None)):
-        if token != settings.Default.DRAGON_TOKEN:
+        if token != Settings.DRAGON_TOKEN:
             return 'fail', 401
 
         if item.activity_code is not None:
-            # 配置腾龙微服务
-            mcc = MicroClientConfig(
-                mcc_url=settings.Default.MCC_BASIC_URL,
-                token=settings.Default.MCC_BASIC_TOKEN
-            )
+
             # 活动延期申请
             activity_apply_form = AsyJDAPI(
-                JdAPI.APP_ID_BUSINESS,
+                Settings.JD_APP_ID_BUSINESS,
                 '60df03e9200c6a00072fdb4d',
-                settings.Default.JD_API_KEY,
-                mcc
+                Settings.JD_API_KEY,
+                mcc=Micro.mcc
             )
 
             res = await activity_apply_form.get_form_data(data_filter={

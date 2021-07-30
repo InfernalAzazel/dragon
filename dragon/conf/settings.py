@@ -1,5 +1,5 @@
-class Default:
 
+class Settings:
     # web 服务器 -----------------------------
     # API 认证
     DRAGON_TOKEN = 'eYhUCuXBGaqv6AeD2W1X3PwC'

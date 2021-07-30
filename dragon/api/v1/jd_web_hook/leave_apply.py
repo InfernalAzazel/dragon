@@ -1,11 +1,11 @@
 import time
-from dragon_micro_client import MicroClientConfig, AsyJDAPI, JDSerialize
+
+from dragon_micro_client import AsyJDAPI, JDSerialize
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
-from sqlobject import connectionForURI, sqlhub
 
-import settings
 from api.v1.jd_web_hook.models import WebHookItem
+from conf import Settings, Micro
 
 doc = '''
 
@@ -19,7 +19,7 @@ def register(router: APIRouter):
     async def leave_apply(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
-                secret=settings.Default.JD_SECRET,
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -36,19 +36,13 @@ async def business(whi: WebHookItem):
     start = time.perf_counter()
     # print(whi.data)
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
-        sqlhub.processConnection = connectionForURI('sqlite:///:memory:')
 
-        # 配置腾龙微服务
-        mcc = MicroClientConfig(
-            mcc_url=settings.Default.MCC_BASIC_URL,
-            token=settings.Default.MCC_BASIC_TOKEN
-        )
         # 异步模式-使用简道云接口 单表单
         asy_jd = AsyJDAPI(
-            app_id=settings.Default.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+            app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
             entry_id='6100b2ab3ed49200083475a9',
-            api_key=settings.Default.JD_API_KEY,
-            mcc=mcc
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
         )
         data = {
             'apply_name': {'value': whi.data['apply_name']},

@@ -4,7 +4,8 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from api.v1.jd_web_hook.models import WebHookItem
-from utils.jd_api import JdAPI
+from conf import Settings, Micro
+from dragon_micro_client import AsyJDAPI
 
 doc = '''
 
@@ -18,7 +19,8 @@ def register(router: APIRouter):
     @router.post('/order-fee', tags=['订单费用剩余数量过渡表'], description=doc)
     async def order_fee(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -37,7 +39,12 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         if whi.data['surplus_count'] == 0 or whi.data['actual_count'] == 0:
             # 业务管理 -> 活动-订单过渡表
-            jd = JdAPI(app_id=JdAPI.APP_ID_BUSINESS, entry_id='5de241b77d6271000609bb76')
+            jd = AsyJDAPI(
+                app_id=Settings.JD_APP_ID_BUSINESS,
+                entry_id='5de241b77d6271000609bb76',
+                api_key=Settings.JD_API_KEY,
+                mcc=Micro.mcc
+            )
             value = await jd.get_form_data(data_filter={
                 "cond": [
                     {

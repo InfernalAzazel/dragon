@@ -13,6 +13,7 @@ jd_front_event.copy_value_to_field.register(jd_front_event_router)
 jd_front_event.activity_postponed_count.register(jd_front_event_router)
 jd_front_event.test.register(jd_front_event_router)
 jd_front_event.activity_postponed_add.register(jd_front_event_router)
+jd_front_event.leave_apply.register(jd_front_event_router)
 
 # 注册 简道云 web hook 的 api
 jd_web_hook.customer_error_activation.register(jd_web_hook_router)

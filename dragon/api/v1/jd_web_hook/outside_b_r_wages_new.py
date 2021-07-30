@@ -1,11 +1,11 @@
 import time
 
-from dragon_micro_client import MicroClientConfig, AsyJDAPI
+from dragon_micro_client import AsyJDAPI
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
-import settings
 from api.v1.jd_web_hook.models import WebHookItem
+from conf import Settings, Micro
 
 doc = '''
 
@@ -19,7 +19,7 @@ def register(router: APIRouter):
     async def outside_b_r_wages_new(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
-                secret=settings.Default.JD_SECRET,
+                secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
@@ -37,17 +37,13 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         if whi.data['view'] == '否/修改':
-            # 配置腾龙微服务
-            mcc = MicroClientConfig(
-                mcc_url=settings.Default.MCC_BASIC_URL,
-                token=settings.Default.MCC_BASIC_TOKEN
-            )
+
             # 异步模式-使用简道云接口 单表单
             asy_jd = AsyJDAPI(
-                app_id=settings.Default.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+                app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
                 entry_id='608bf52d1ed68a0007501a54',
-                api_key=settings.Default.JD_API_KEY,
-                mcc=mcc
+                api_key=Settings.JD_API_KEY,
+                mcc=Micro.mcc
             )
             # 人事管理 -> 修改人员档案银行卡信息申请
             await asy_jd.query_update_data_one(

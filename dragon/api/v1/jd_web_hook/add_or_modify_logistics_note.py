@@ -4,22 +4,22 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from api.v1.jd_web_hook.models import WebHookItem
-from utils.jd_api import JdAPI
+from conf import Settings, Micro
+from dragon_micro_client import AsyJDAPI
 
 doc = '''
     新增或修改物流备忘录
 
 '''
-# 流备忘录
-logistics_note_form = JdAPI(JdAPI.APP_ID_BUSINESS, '5f969ac016a8df0006f8b1e2')
 
 
 def register(router: APIRouter):
     @router.post('/add-or-modify-logistics-note', tags=['新增或修改物流备忘录'], description=doc)
     async def add_or_modify_logistics_note(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JdAPI.get_signature(
+        if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
                 nonce=req.query_params['nonce'],
+                secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
@@ -34,7 +34,14 @@ async def business(whi):
     start = time.perf_counter()
     # 流程完成
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
-        pass
+
+        # 流备忘录
+        logistics_note_form = AsyJDAPI(
+            app_id=Settings.JD_APP_ID_BUSINESS,
+            entry_id='5f969ac016a8df0006f8b1e2',
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
 
         res = await logistics_note_form.get_form_data(
             data_filter={

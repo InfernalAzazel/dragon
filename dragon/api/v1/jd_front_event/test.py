@@ -1,17 +1,20 @@
 from fastapi import APIRouter, BackgroundTasks
-
-from utils import JdAPI
+from dragon_micro_client import AsyJDAPI
+from conf import Settings, Micro
 
 doc = '''
     测试
 
 '''
 
-# 客户档案
-jd_customer_profile = JdAPI(JdAPI.APP_ID_BUSINESS, '5dd102e307747e0006801bee')
-
 
 async def write_notification():
+    # 客户档案
+    jd_customer_profile = AsyJDAPI(
+        Settings.JD_APP_ID_BUSINESS,
+        '5dd102e307747e0006801bee',
+        mcc=Micro.mcc
+    )
     res = await jd_customer_profile.get_form_data()
     print(len(res))
 
