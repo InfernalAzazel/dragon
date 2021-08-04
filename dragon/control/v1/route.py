@@ -14,6 +14,7 @@ jd_front_event.activity_postponed_count.register(jd_front_event_router)
 jd_front_event.test.register(jd_front_event_router)
 jd_front_event.activity_postponed_add.register(jd_front_event_router)
 jd_front_event.leave_apply.register(jd_front_event_router)
+jd_front_event.r_a_d_reward_apply.register(jd_front_event_router)
 
 # 注册 简道云 web hook 的 api
 jd_web_hook.customer_error_activation.register(jd_web_hook_router)
@@ -31,6 +32,15 @@ jd_web_hook.quality_monitor_plan_launch2.register(jd_web_hook_router)
 jd_web_hook.b_r_net_growth_reward.register(jd_web_hook_router)
 # jd_web_hook.cpw_modify_apply.register(jd_web_hook_router)
 jd_web_hook.leave_apply.register(jd_web_hook_router)
+jd_web_hook.a_d_reward_over_table.register(jd_web_hook_router)
+jd_web_hook.r_a_d_reward_apply.register(jd_web_hook_router)
+jd_web_hook.salary_deduction_approval.register(jd_web_hook_router)
+jd_web_hook.province_trade_wages.register(jd_web_hook_router)
+jd_web_hook.outside_trade_wages.register(jd_web_hook_router)
+jd_web_hook.outside_trade_wages_new.register(jd_web_hook_router)
+jd_web_hook.sales_volume_wages.register(jd_web_hook_router)
+jd_web_hook.brand_director_wages.register(jd_web_hook_router)
+jd_web_hook.promoter_wages.register(jd_web_hook_router)
 
 # 注册 u8
 u8.product_ret_goods_apply.register(u8_router)

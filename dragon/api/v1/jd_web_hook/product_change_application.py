@@ -6,7 +6,7 @@ from loguru import logger
 
 from utils import Mgo
 from utils.dragon_logger import DragonLogger
-from dragon_micro_client import AsyJDAPI,JDSerialize
+from dragon_micro_client import AsyJDAPI, JDSerialize
 from conf import Settings, Micro
 
 doc = '''
@@ -183,7 +183,7 @@ async def business(whi):
                 await customer_profile.update_data(
                     dataId=result[ii]['_id'],
                     data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
-                                        data=whi_data_subform))
+                                             data=whi_data_subform))
             else:
 
                 # 客户档案更新
@@ -211,7 +211,7 @@ async def business(whi):
                 await customer_profile.update_data(
                     dataId=result[ii]['_id'],
                     data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
-                                        data=cpp_subform))
+                                             data=cpp_subform))
 
         # ====================================================================================================
 

@@ -45,42 +45,63 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
-        count = await Mgo(db_name=db_name, coll_name=coll_name).count({'data_id': whi.data['_id']})
+        # count = await Mgo(db_name=db_name, coll_name=coll_name).count({'data_id': whi.data['_id']})
+        #
+        # if count > 0:
+        #     await DragonLogger.warn(
+        #         project_name=project_name, program_type=program_type, business_name=business_name,
+        #         error_msg=f'{whi.data["name"]} 反复触发已忽略下面代码运行'
+        #     )
+        #     return
+        #
+        # await Mgo(db_name=db_name, coll_name=coll_name).insert_one({'data_id': whi.data['_id']})
 
-        if count > 0:
-            await DragonLogger.warn(
-                project_name=project_name, program_type=program_type, business_name=business_name,
-                error_msg=f'{whi.data["name"]} 反复触发已忽略下面代码运行'
-            )
-            return
-
-        await Mgo(db_name=db_name, coll_name=coll_name).insert_one({'data_id': whi.data['_id']})
+        jd = AsyJDAPI.auto_init(
+            app_id_list=[
+                Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+                Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL
+            ],
+            entry_id_list=[
+                '5df87216281aa4000604af2e',
+                '5df73f5ca667c000067cd60c'
+            ],
+            api_key=Settings.JD_API_KEY,
+            mcc=Micro.mcc
+        )
 
         # 人员维护表单
-        personnel_maintain_form = AsyJDAPI(
-            app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
-            entry_id='5df87216281aa4000604af2e',
-            api_key=Settings.JD_API_KEY,
-            mcc=Micro.mcc
-        )
+        personnel_maintain_form = jd[0]
 
         # 入职申请表单
-        entry_apply_form = AsyJDAPI(
-            app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
-            entry_id='5df73f5ca667c000067cd60c',
-            api_key=Settings.JD_API_KEY,
-            mcc=Micro.mcc
+        entry_apply_form = jd[1]
+
+        await personnel_maintain_form.query_update_data_one(
+            data_filter={
+                "rel": "and",
+                "cond": [
+                    {
+                        "field": 'name',
+                        "type": 'text',
+                        "method": whi.data['name'],
+                    },
+                    {
+                        "field": 'name_member',
+                        "type": 'number',
+                        "method": "empty",  # 成员
+                    },
+                ]
+            },
+            data={
+                'name': {
+                    'value': whi.data['name']
+                },
+                'name_member': {
+                    'value': whi.data['no']
+                },
+            },
+            non_existent_create=True
         )
 
-        # 创建数据
-        await personnel_maintain_form.create_data(data={
-            'name': {
-                'value': whi.data['name']
-            },
-            'name_member': {
-                'value': whi.data['no']
-            },
-        })
         # 查询人员维护表
         res = await personnel_maintain_form.get_form_data(
             limit=100,

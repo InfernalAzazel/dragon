@@ -1,3 +1,7 @@
+import calendar
+import datetime
+import time
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -5,7 +9,7 @@ import router.v1.index
 
 
 def create_app():
-    app = FastAPI(
+    apps = FastAPI(
         title="腾龙",
         description="简道云 u8 企业微信 交互 服务器",
         version="stable 0.1.1",
@@ -15,21 +19,21 @@ def create_app():
     )
 
     # 注册路由
-    router.v1.index.register(app)
+    router.v1.index.register(apps)
 
-    return app
-
-
-app = create_app()
+    return apps
 
 
-@app.on_event('startup')
+fast_app = create_app()
+
+
+@fast_app.on_event('startup')
 async def startup():
-   pass
+    pass
 
 
 def main():
-    uvicorn.run(app=app, host="0.0.0.0", port=6666, debug=False)
+    uvicorn.run(app=fast_app, host="0.0.0.0", port=6666, debug=False)
 
 
 if __name__ == '__main__':

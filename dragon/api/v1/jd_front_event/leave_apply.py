@@ -11,7 +11,7 @@ class Inputs(BaseModel):
 
 
 class Outputs(BaseModel):
-    flow_state: Optional[int] = Field(None, description='流程状态')
+    flow_state: Optional[str] = Field(None, description='流程状态')
 
 
 # 请假申请表单-获取流程状态是否进行中
@@ -47,12 +47,12 @@ def register(router: APIRouter):
                     }
                 ]
             })
-        outputs = Outputs(flow_state=-1)
+        outputs = Outputs(flow_state='否')
         if not res:
             return outputs.dict()
         for value in res:
             # 有一条在进行中
             if value['flowState'] == 0:
-                outputs = Outputs(flow_state=0)
+                outputs = Outputs(flow_state='是')
                 return outputs.dict()
         return outputs.dict()
