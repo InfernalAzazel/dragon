@@ -53,38 +53,28 @@ async def business(whi):
         mcc=Micro.mcc
     )  # 上线
 
-    widgets = await entry_application_form.get_form_widgets()
-
-    for wid in widgets:
-        if str(wid['label']) == '姓名':
-            name_field = str(wid['name'])
-            name_types = str(wid['type'])
-        elif str(wid['label']) == '身份证号码':
-            id_card_field = str(wid['name'])
-        elif str(wid['label']) == '手机号码':
-            mobile_phone_field = str(wid['name'])
-
-    value = await entry_application_form.get_form_data(
+    res = await entry_application_form.get_form_data(
         data_filter={
             "cond": [
                 {
-                    "field": name_field,
-                    "type": name_types,
+                    "field": 'name',
+                    "type": 'text',
                     "method": "eq",
-                    "value": whi.data[name_field]
+                    "value": whi.data['name']
                 }
             ]
         })
 
-    if value:
-        for val in value:
+    if res:
+        for val in res:
+            # 手动结束
             if val['flowState'] == 2:
                 await entry_application_form.update_data(
-                    dataId=whi.data['_id'],
+                    dataId=val['_id'],
                     data={
-                        name_field: {'value': ''},
-                        mobile_phone_field: {'value': ''},
-                        id_card_field: {'value': ''}
+                        'name': {'value': ''},
+                        'phone': {'value': ''},
+                        'id_card': {'value': ''}
                     })
 
     # 结束时间

@@ -41,6 +41,8 @@ jd_web_hook.outside_trade_wages_new.register(jd_web_hook_router)
 jd_web_hook.sales_volume_wages.register(jd_web_hook_router)
 jd_web_hook.brand_director_wages.register(jd_web_hook_router)
 jd_web_hook.promoter_wages.register(jd_web_hook_router)
+jd_web_hook.modify_work_date.register(jd_web_hook_router)
+jd_web_hook.r_r_application_for_violations.register(jd_web_hook_router)
 
 # 注册 u8
 u8.product_ret_goods_apply.register(u8_router)

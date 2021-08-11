@@ -44,22 +44,14 @@ async def business(whi):
             api_key=Settings.JD_API_KEY,
             mcc=Micro.mcc
         )
-        widgets = await jd.get_form_widgets()
-
-        for wid in widgets:
-            if str(wid['label']) == '客户代码':
-                customer_code_field = str(wid['name'])
-                customer_code__types = str(wid['type'])
-            if str(wid['label']) == '客户合作状态':
-                customer_cooperation_state_field = str(wid['name'])
 
         value = await jd.get_form_data(data_filter={
             "cond": [
                 {
-                    "field": customer_code_field,
-                    "type": customer_code__types,
+                    "field": 'customer_code',
+                    "type": 'text',
                     "method": "eq",
-                    "value": whi.data['_widget_1623036835046']  # 客户代码
+                    "value": whi.data['customer_code']  # 客户代码
                 }
             ]
         })
@@ -67,7 +59,7 @@ async def business(whi):
         if value:
             for val in value:
                 # 更新
-                await jd.update_data(val['_id'], data={customer_cooperation_state_field: {"value": "合作"}})
+                await jd.update_data(val['_id'], data={'khhzzt': {"value": "合作"}})
         # 结束时间
         elapsed = (time.perf_counter() - start)
         logger.info(f'[+] 更新完成')

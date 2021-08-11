@@ -108,12 +108,21 @@ async def business(whi):
                         'type': 'text',
                         "value": daqujinli_bumen['name']
                     },
+                    {
+                        "field": 'flowState',
+                        "method": "eq",
+                        'type': 'text',
+                        "value": [1]
+                    },
                 ]
             })
         if not res:
             return
+
         for vlaue in res[0]['jixiao_zb2']:
+
             if vlaue['khxm2'] == '指定开发奖励' and vlaue['qudao'] == whi.data['typename']:
+
                 await jd_a_d_reward_apply_from.create_data(data={
                     'serial_number': {'value': whi.data['serial_number']},  # 流水号
                     'managername': {'value': whi.data['managername']},  # 建档人
