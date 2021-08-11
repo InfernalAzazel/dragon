@@ -1,12 +1,11 @@
 import time
+
+from dragon_micro_client import AsyJDAPI
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from api.v1.jd_web_hook.models import WebHookItem
-from utils import Mgo
-from utils.dragon_logger import DragonLogger
 from conf import Settings, Micro
-from dragon_micro_client import AsyJDAPI
 
 doc = '''
     入职申请表-人员维护
@@ -44,17 +43,6 @@ async def business(whi):
     start = time.perf_counter()
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
-
-        # count = await Mgo(db_name=db_name, coll_name=coll_name).count({'data_id': whi.data['_id']})
-        #
-        # if count > 0:
-        #     await DragonLogger.warn(
-        #         project_name=project_name, program_type=program_type, business_name=business_name,
-        #         error_msg=f'{whi.data["name"]} 反复触发已忽略下面代码运行'
-        #     )
-        #     return
-        #
-        # await Mgo(db_name=db_name, coll_name=coll_name).insert_one({'data_id': whi.data['_id']})
 
         jd = AsyJDAPI.auto_init(
             app_id_list=[
@@ -103,8 +91,7 @@ async def business(whi):
         )
 
         # 查询人员维护表
-        res = await personnel_maintain_form.get_form_data(
-            limit=100,
+        res = await personnel_maintain_form.get_all_data(
             data_filter={
                 "rel": "and",
                 "cond": [

@@ -25,3 +25,4 @@ from api.v1.jd_web_hook import brand_director_wages
 from api.v1.jd_web_hook import promoter_wages
 from api.v1.jd_web_hook import modify_work_date
 from api.v1.jd_web_hook import r_r_application_for_violations
+from api.v1.jd_web_hook import insufficient_month_quit_wages

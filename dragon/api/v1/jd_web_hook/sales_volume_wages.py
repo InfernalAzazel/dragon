@@ -80,7 +80,7 @@ async def business(whi):
                     # 'gsbm': {'value': [value['gsbm'][0]['dept_no']]},  # 归属部门
                     # 'kkrq': {'value': value['kkrq']},  # 对应工资扣款日期
                     # 'kkny': {'value': value['kkny']},  # 对应工资扣款年月
-                    # 'nygh': {'value': value['nygh']},  # 年月+工号
+                    'nygh': {'value': value['nygh']},  # 年月+工号
                     'kmdm': {'value': value['jz_code']},  # 科目代码
                     'kmmc': {'value': value['kmmc']},  # 科目名称
                     'kklb': {'value': value['kklb']},  # 扣款类别
