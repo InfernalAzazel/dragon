@@ -59,7 +59,7 @@ async def business(whi):
                             "field": 'jzdh',
                             "type": 'text',
                             "method": "eq",
-                            "value": whi.data['gz_no']  # 来源单号
+                            "value": whi.data['form_no']  # 来源单号
                         },
                         {
                             "field": 'wyz',

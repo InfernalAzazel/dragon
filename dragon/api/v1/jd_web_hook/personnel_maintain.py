@@ -8,20 +8,13 @@ from api.v1.jd_web_hook.models import WebHookItem
 from conf import Settings, Micro
 
 doc = '''
-    入职申请表-人员维护
+    账号管理-人员维护
 
 '''
 
-project_name = '入职申请表-人员维护'
-program_type = 'web-hook'
-business_name = 'personnel-maintain'
-
-db_name = 'blue-jd'  # 简道云数据库
-coll_name = 'query-cache'  # 查询缓存
-
 
 def register(router: APIRouter):
-    @router.post('/personnel-maintain', tags=['入职申请表-人员维护'], description=doc)
+    @router.post('/personnel-maintain', tags=['账号管理-人员维护'], description=doc)
     async def personnel_maintain(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
@@ -42,96 +35,39 @@ async def business(whi):
     # 启动时间
     start = time.perf_counter()
 
-    if whi.data['flowState'] == 1 and whi.op == 'data_update':
+    jd = AsyJDAPI(
+        app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
+        entry_id="5df87216281aa4000604af2e",
+        api_key=Settings.JD_API_KEY,
+        mcc=Micro.mcc
+    )
 
-        jd = AsyJDAPI.auto_init(
-            app_id_list=[
-                Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
-                Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL
-            ],
-            entry_id_list=[
-                '5df87216281aa4000604af2e',
-                '5df73f5ca667c000067cd60c'
-            ],
-            api_key=Settings.JD_API_KEY,
-            mcc=Micro.mcc
-        )
+    # 人员维护表单
+    personnel_maintain_form = jd
 
-        # 人员维护表单
-        personnel_maintain_form = jd[0]
-
-        # 入职申请表单
-        entry_apply_form = jd[1]
-
-        await personnel_maintain_form.query_update_data_one(
-            data_filter={
-                "rel": "and",
-                "cond": [
-                    {
-                        "field": 'name',
-                        "type": 'text',
-                        "method": whi.data['name'],
-                    },
-                    {
-                        "field": 'name_member',
-                        "type": 'number',
-                        "method": "empty",  # 成员
-                    },
-                ]
-            },
-            data={
-                'name': {
-                    'value': whi.data['name']
+    await personnel_maintain_form.query_update_data_one(
+        data_filter={
+            "rel": "and",
+            "cond": [
+                {
+                    "field": 'name',
+                    "type": 'text',
+                    "method": whi.data['_widget_1571113838984'],
                 },
-                'name_member': {
-                    'value': whi.data['no']
-                },
+            ]
+        },
+        data={
+            'name': {
+                'value': whi.data['_widget_1571113838984']
             },
-            non_existent_create=True
-        )
-
-        # 查询人员维护表
-        res = await personnel_maintain_form.get_all_data(
-            data_filter={
-                "rel": "and",
-                "cond": [
-                    {
-                        "field": 'name',
-                        "type": 'text',
-                        "method": "not_empty",
-                    },
-                    {
-                        "field": 'name_member',
-                        "type": 'number',
-                        "method": "empty",  # 成员
-                    },
-                ]
-            }
-        )
-        if res:
-            for value in res:
-                # # 查询入职申请表
-                res2 = await entry_apply_form.get_form_data(
-                    data_filter={
-                        "cond": [
-                            {
-                                "field": 'name',
-                                "type": 'text',
-                                "method": "eq",
-                                "value": value['name']  # 姓名
-                            },
-                        ]
-                    }
-                )
-                if res2:
-                    # 更新人员维护表
-                    await personnel_maintain_form.update_data(
-                        dataId=value['_id'],
-                        data={
-                            'name_member': {
-                                'value': res2[0]['no']
-                            },
-                        })
+            'name_member': {
+                'value': whi.data['_widget_1571113838969']
+            },
+        },
+        non_existent_create=True
+    )
+    # # 流程完成
+    # if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
     # 结束时间
     elapsed = (time.perf_counter() - start)

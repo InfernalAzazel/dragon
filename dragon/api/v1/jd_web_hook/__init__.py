@@ -26,3 +26,15 @@ from api.v1.jd_web_hook import promoter_wages
 from api.v1.jd_web_hook import modify_work_date
 from api.v1.jd_web_hook import r_r_application_for_violations
 from api.v1.jd_web_hook import insufficient_month_quit_wages
+from api.v1.jd_web_hook import sales_product_issue_doc
+from api.v1.jd_web_hook import award_cover_delivery_order
+from api.v1.jd_web_hook import activity_expense_issue_doc
+from api.v1.jd_web_hook import card_scraping_delivery_order
+from api.v1.jd_web_hook import picking_sample_issue_doc
+from api.v1.jd_web_hook import debit_issue_doc
+from api.v1.jd_web_hook import picking_material_issue_doc
+from api.v1.jd_web_hook import complimentary_material_issue_doc
+from api.v1.jd_web_hook import sales_material_issue_doc
+from api.v1.jd_web_hook import purchase_return_issue_doc
+from api.v1.jd_web_hook import dead_material_issue_doc
+#

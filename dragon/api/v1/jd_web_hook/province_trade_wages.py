@@ -78,7 +78,7 @@ async def business(whi):
                     'jzr_wb': {'value': value['jzr_wb']},  # 姓名（文本）
                     'jzrgh': {'value': value['jz_person_code']},  # 工号
                     # 'gsbm': {'value': [value['gsbm'][0]['dept_no']]},  # 归属部门
-                    # 'kkrq': {'value': value['kkrq']},  # 对应工资扣款日期
+                    'kkrq': {'value': whi.data['gz_date']},  # 对应工资扣款日期
                     'kkny': {'value': whi.data['gz_nianyue']},  # 对应工资扣款年月
                     'nygh': {'value': whi.data['nianyuegh']},  # 年月+工号
                     'kmdm': {'value': value['jz_code']},  # 科目代码
