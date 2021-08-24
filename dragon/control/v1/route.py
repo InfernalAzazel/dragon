@@ -55,5 +55,6 @@ jd_web_hook.complimentary_material_issue_doc.register(jd_web_hook_router)
 jd_web_hook.sales_material_issue_doc.register(jd_web_hook_router)
 jd_web_hook.purchase_return_issue_doc.register(jd_web_hook_router)
 jd_web_hook.dead_material_issue_doc.register(jd_web_hook_router)
+jd_web_hook.special_application.register(jd_web_hook_router)
 # 注册 u8
 u8.product_ret_goods_apply.register(u8_router)

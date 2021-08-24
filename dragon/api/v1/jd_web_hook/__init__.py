@@ -37,4 +37,4 @@ from api.v1.jd_web_hook import complimentary_material_issue_doc
 from api.v1.jd_web_hook import sales_material_issue_doc
 from api.v1.jd_web_hook import purchase_return_issue_doc
 from api.v1.jd_web_hook import dead_material_issue_doc
-#
+from api.v1.jd_web_hook import special_application

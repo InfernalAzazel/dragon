@@ -9,15 +9,16 @@ from dragon_micro_client import AsyJDAPI
 
 doc = '''
     
-    工资扣款审批 -> 流程完成 -> 触发
+    工资缴纳支出审批 -> 流程完成 -> 触发
     
     创建数据
-
+    
+    工资扣款（主表）
 '''
 
 
 def register(router: APIRouter):
-    @router.post('/salary-deduction-approval', tags=['工资扣款审批-创建数据到->工资扣款（主表）'], description=doc)
+    @router.post('/salary-deduction-approval', tags=['工资缴纳支出审批-创建数据到->工资扣款（主表）'], description=doc)
     async def salary_deduction_approval(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != AsyJDAPI.get_signature(
