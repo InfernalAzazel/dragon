@@ -22,3 +22,7 @@ class Settings:
     JD_APP_ID_MINISTRY_OF_PERSONNEL = '5df62d315fb7f10006a0b21e'
     # (生产) 质量管理
     JD_APP_ID_QUALITY = '5e44a6166adcd20006eb515f'
+    # 仓库管理系统（在使用）
+    JD_APP_ID_WAREHOUSE_M_SYSTEM = '5e0db1ac3e79d40006ceaedd'
+    # 空白区域管理（正式系统）
+    JD_APP_ID_BLANK_AREA_MANAGEMENT = '5df633e09a7d50000618e78a'

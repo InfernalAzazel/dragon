@@ -1,2 +1,1 @@
-
-from router import v1
+from router import index

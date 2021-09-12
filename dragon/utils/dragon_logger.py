@@ -1,16 +1,15 @@
-from dragon_micro_client import AsyJDAPI
-from conf import Settings, Micro
+from lunar_you_ying import JDSDK
+from conf import Settings
 
 
 class DragonLogger:
     """
     对简道云 Azazel-DragonLog 表单插入日志信息
     """
-    program_exception_table = AsyJDAPI(
+    program_exception_table = JDSDK(
         app_id=Settings.JD_APP_ID_BUSINESS,
         entry_id='60e28f280840eb000756835e',
         api_key=Settings.JD_API_KEY,
-        mcc=Micro.mcc
     )
 
     @staticmethod

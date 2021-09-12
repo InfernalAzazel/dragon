@@ -1,11 +1,7 @@
-import calendar
-import datetime
-import time
-
 import uvicorn
 from fastapi import FastAPI
 
-import router.v1.index
+import router.index
 
 
 def create_app():
@@ -19,7 +15,7 @@ def create_app():
     )
 
     # 注册路由
-    router.v1.index.register(apps)
+    router.index.register(apps)
 
     return apps
 
