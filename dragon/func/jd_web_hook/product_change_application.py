@@ -3,10 +3,7 @@ import time
 from func.jd_web_hook.models import WebHookItem
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
-
-from utils import Mgo
-from utils.dragon_logger import DragonLogger
-from lunar_you_ying import JDSDK, JDSerialize
+from yetai import JDSDK, JDSerialize
 from conf import Settings
 
 doc = '''
@@ -18,13 +15,6 @@ doc = '''
     2. 过渡表更新每一条分销商产品信息 
 
 '''
-
-project_name = '新增或修改产品信息申请'
-program_type = 'web-hook'
-business_name = 'product_change_application'
-
-db_name = 'blue-jd'  # 简道云数据库
-coll_name = 'query-cache'  # 查询缓存
 
 
 def register(router: APIRouter):
@@ -56,8 +46,6 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
-        count = await Mgo(db_name=db_name, coll_name=coll_name).count({'data_id': whi.data['_id']})
-
         jd = JDSDK.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_BUSINESS,
@@ -75,15 +63,6 @@ async def business(whi):
         customer_profile = jd[0]  # 客户档案
         product_change_application_table = jd[1]  # 新增或修改产品信息申请
         customer_sales_product_table = jd[2]  # 客户销售产品过渡表
-
-        if count > 0:
-            await DragonLogger.warn(
-                project_name=project_name, program_type=program_type, business_name=business_name,
-                error_msg='反复触发已忽略下面代码运行'
-            )
-            return
-
-        await Mgo(db_name=db_name, coll_name=coll_name).insert_one({'data_id': whi.data['_id']})
 
         # 新增或修改产品信息申请
         widgets = await product_change_application_table.get_form_widgets()

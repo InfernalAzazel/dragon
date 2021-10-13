@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK
+from robak import Jdy
 
 doc = '''
     新增或修改物流备忘录
@@ -17,7 +17,7 @@ def register(router: APIRouter):
     @router.post('/add-or-modify-logistics-note', tags=['新增或修改物流备忘录'], description=doc)
     async def add_or_modify_logistics_note(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -40,7 +40,7 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
         # 流备忘录
-        logistics_note_form = JDSDK(
+        logistics_note_form = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='5f969ac016a8df0006f8b1e2',
             api_key=Settings.JD_API_KEY,

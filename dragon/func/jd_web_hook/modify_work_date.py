@@ -7,7 +7,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK, JDSerialize
+from yetai import JDSDK, JDSerialize
 
 doc = '''
 

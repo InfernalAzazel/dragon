@@ -1,6 +1,7 @@
+from datetime import datetime
 import time
 
-from lunar_you_ying import JDSDK
+from yetai import JDSDK, JDSerialize
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
@@ -9,13 +10,23 @@ from func.jd_web_hook.models import WebHookItem
 
 doc = '''
 
-   质量监控计划发起
+   质量监控计划基础信息 (非流程表单)
+
+   流程进行中:
+
+   按照 线别+项目 查询 质量监控计划检查 
+
+   修改
+
+   上次操作时间 + 周期 -> 上次操作日期
+   当前操作日期 + 周期 -> 准备操作日期
+   下次操作时间 + 周期 -> 下次操作日期
 
 '''
 
 
 def register(router: APIRouter):
-    @router.post('/quality-monitor-plan-launch', tags=['质量监控计划发起'], description=doc)
+    @router.post('/quality-monitor-plan-launch', tags=['质量监控计划基础信息'], description=doc)
     async def quality_monitor_plan_launch(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != JDSDK.get_signature(
@@ -32,7 +43,6 @@ def register(router: APIRouter):
 
 # 处理业务
 async def business(whi: WebHookItem):
-
     async def errFn(e):
         if e is not None:
             print(e)
@@ -40,29 +50,85 @@ async def business(whi: WebHookItem):
 
     # 启动时间
     start = time.perf_counter()
-    # 异步模式-使用简道云接口 单表单
-    asy_jd = JDSDK(
-        app_id=Settings.JD_APP_ID_QUALITY,
-        entry_id='60f28718598cae0008105cae',
-        api_key=Settings.JD_API_KEY,
-    )
-    _, err = await asy_jd.query_update_data_one(
-        data_filter={
-            "cond": [
-                {
-                    "field": 'linear_project',
-                    "type": 'text',
-                    "method": "eq",
-                    "value": whi.data['linear_project']
-                }
-            ]
-        },
-        data={
-            'current_date': {'value': whi.data['current_date']},
-            'next_date': {'value': whi.data['next_date']},
-        }
-    )
-    await errFn(err)
+    if whi.op == 'data_create' or whi.op == 'data_update':
+
+        try:
+            cycle = whi.data['cycle'] * 86400
+        except:
+            cycle = 0
+        try:
+            e_w_lead_time = whi.data['e_w_lead_time'] * 86400
+        except:
+            e_w_lead_time = 0
+
+        jdy = JDSDK(
+            app_id=Settings.JD_APP_ID_QUALITY,
+            entry_id='60f373bc498d2c000890f574',  # 质量监控计划检查
+            api_key=Settings.JD_API_KEY,
+        )
+
+        res, err = await jdy.get_form_data(
+            data_filter={
+                "rel": "and",  # 或者"or"
+                "cond": [
+                    {
+                        "field": 'linear_project',
+                        "type": 'text',
+                        "method": "eq",
+                        "value": whi.data['linear_project']
+                    },
+                    {
+                        "field": 'flowState',
+                        "method": "eq",
+                        "value": [0]
+                    }
+                ]
+            }
+        )
+
+        await errFn(err)
+
+        for value in res:
+            # print(value)
+            try:
+                last_data_temp = time.strptime(value['last_data'], '%Y-%m-%dT%H:%M:%S.%fZ')
+
+                current_date = datetime.strptime(
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(last_data_temp) + cycle)),
+                    '%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+                current_date_temp = time.strptime(current_date, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+                next_date = datetime.strptime(
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(current_date_temp) + cycle)),
+                    '%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+                next_date_temp = time.strptime(next_date, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+                lowest_data = datetime.strptime(
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(next_date_temp) + cycle)),
+                    '%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                next_e_w_date = datetime.strptime(
+                    time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.mktime(next_date_temp) - e_w_lead_time)),
+                    '%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+                _, err = await jdy.update_data(
+                    dataId=value['_id'],
+                    data={
+                        'cycle': {'value': whi.data['cycle']},
+                        'e_w_lead_time': {'value': whi.data['e_w_lead_time']},
+                        'dispatch': {'value': JDSerialize.member_array_err_to_none(whi.data, 'dispatch')},
+                        'supervisor': {'value': JDSerialize.member_array_err_to_none(whi.data, 'supervisor')},
+                        'o_is_qualified': {'value': ''},
+                        'current_date': {'value': current_date},
+                        'next_date': {'value': next_date},
+                        'lowest_data': {'value': lowest_data},
+                        'next_e_w_date': {'value': next_e_w_date},
+                    }
+                )
+                await errFn(err)
+            except Exception as e:
+                await errFn(e)
 
     # 结束时间
     elapsed = (time.perf_counter() - start)

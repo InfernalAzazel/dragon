@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 from conf import Settings
-from lunar_you_ying import JDSDK
+from robak import Jdy
 
 
 class Inputs(BaseModel):
@@ -34,7 +34,7 @@ def register(router: APIRouter):
             return 'fail', 401
             # 请假申请表单
 
-        jd_leave_apply_form = JDSDK(
+        jd_leave_apply_form = Jdy(
             app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
             entry_id='5e7aa499fe9288000704f1e5',
             api_key=Settings.JD_API_KEY,

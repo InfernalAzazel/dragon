@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
     专项申请 -> 流程完成 -> 触发
@@ -20,7 +20,7 @@ def register(router: APIRouter):
     @router.post('/special-application', tags=['专项申请-情况无关项'], description=doc)
     async def special_application(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -42,7 +42,7 @@ async def business(whi: WebHookItem):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         # 活动申请表单
-        jd_special_application_from = JDSDK(
+        jd_special_application_from = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='6122f601434d980008a21e9e',
             api_key=Settings.JD_API_KEY,
@@ -64,7 +64,7 @@ async def business(whi: WebHookItem):
 
         _, err = await jd_special_application_from.update_data(
             dataId=whi.data['_id'],
-            data=JDSerialize.subform(subform_field='jixiao_zb2', data=subform))
+            data=JdySerialize.subform(subform_field='jixiao_zb2', data=subform))
         await errFn(err)
         
         # 结束时间

@@ -1,6 +1,6 @@
 import time
 
-from lunar_you_ying import JDSDK, JDSerialize
+from yetai import JDSDK, JDSerialize
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 

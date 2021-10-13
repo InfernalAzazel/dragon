@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
 
@@ -21,7 +21,7 @@ def register(router: APIRouter):
     @router.post('/dead-material-issue-doc', tags=['呆料出库单-创建数据到->物料出库单_总表'], description=doc)
     async def dead_material_issue_doc(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -44,13 +44,13 @@ async def business(whi: WebHookItem):
     if whi.op == 'data_create':
 
         # 营销_产品出库总表
-        jd = JDSDK(
+        jdy = Jdy(
             app_id=Settings.JD_APP_ID_WAREHOUSE_M_SYSTEM,
             entry_id='5eeb0c30494c830006f80d46',
             api_key=Settings.JD_API_KEY,
         )
         if whi.data['total_issue_quantity'] != 0:
-            _, err = await jd.query_update_data_one(
+            _, err = await jdy.query_update_data_one(
                 data_filter={
                     "rel": "and",  # 或者"or"
                     "cond": [
@@ -69,7 +69,7 @@ async def business(whi: WebHookItem):
                     'delivery_date': {'value': whi.data['delivery_date']},  # 出库日期
                     'total_issue_quantity': {'value': whi.data['total_issue_quantity']},  # 出库数量合计
                     'warehouse': {'value': whi.data['warehouse']},  # 仓库
-                    'delivery_details': JDSerialize.subform(subform_field="delivery_details", data=whi.data['delivery_details'])["delivery_details"],
+                    'delivery_details': JdySerialize.subform(subform_field="delivery_details", data=whi.data['delivery_details'])["delivery_details"],
                     # 出库明细 子表单
                     'remarks': {'value': whi.data['remarks']},  # 备注
 

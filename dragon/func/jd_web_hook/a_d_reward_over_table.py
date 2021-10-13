@@ -7,7 +7,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
     指定开发奖励申请过渡表-指定开发奖励申请
@@ -20,10 +20,10 @@ doc = '''
 
 
 def register(router: APIRouter):
-    @router.post('/a-d-reward-over-table', tags=['指定开发奖励申请过渡表-指定开发奖励申请'], description=doc)
+    @router.post('/a-d-reward-over-table', tags=['指定开发奖励申请过渡表-指定开发奖励审批'], description=doc)
     async def a_d_reward_over_table(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -59,42 +59,24 @@ async def business(whi):
             '%Y-%m-%dT%H:%M:%S.000Z')
 
         # print(whi.data)
-        jd = JDSDK.auto_init(
-            #                        人事管理                                   业务管理                业务管理
-            app_id_list=[Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL, Settings.JD_APP_ID_BUSINESS,
-                         Settings.JD_APP_ID_BUSINESS],
-            #                      人员档案                 专项申请                           指定开发奖励申请
-            entry_id_list=['5df7a704c75c0e00061de8f6', '60fe7110e88fcb0008971e25', '61052e6eb23ee70007657cc5'],
+        jd = Jdy.auto_init(
+
+            app_id_list=[
+                Settings.JD_APP_ID_BUSINESS,
+                Settings.JD_APP_ID_BUSINESS
+            ],
+            entry_id_list=[
+                '6127060adbc2410009f4a102',  # 专项申请
+                '61052e6eb23ee70007657cc5',  # 指定开发奖励申请
+            ],
             api_key=Settings.JD_API_KEY,
         )
-        # 人员档案
-        jd_personnel_files_from = jd[0]
         # 专项申请
-        jd_a_d_special_apply_from = jd[1]
-        # 指定开发奖励申请
-        jd_a_d_reward_apply_from = jd[2]
+        jd_a_d_special_apply_from = jd[0]
+        # 指定开发奖励审批
+        jd_a_d_reward_apply_from = jd[1]
 
-        # 人员档案
-        res, err = await jd_personnel_files_from.get_form_data(
-            data_filter={
-                "cond": [
-                    {
-                        "field": 'no',
-                        "type": 'text',
-                        "method": "eq",
-                        "value": whi.data['id']  # 工号
-                    }
-                ]
-            })
-        await errFn(err)
-        if not res:
-            return
-
-        if not res[0]:
-            return
-        # 大区部门 数据 {'_id': '603e07e13f18421a22822d0b', 'dept_no': 7877, 'name': '谢敏赣南大区部门'}
-        daqujinli_bumen = res[0]['daqujinli_bumen']
-        # 专项申请 daqujinli_bumen_t
+        # 专项申请
         res, err = await jd_a_d_special_apply_from.get_form_data(
             data_filter={
                 "rel": "and",  # 或者"or"
@@ -102,24 +84,24 @@ async def business(whi):
                     {
                         "field": 'jixiao_nianyue',
                         "method": "range",
-                        'type': 'datetime',
                         "value": [start_time, end_time]
                     },
                     {
-                        "field": 'daqujinli_bumen_t',
+                        "field": 'account',
                         "method": "eq",
-                        'type': 'text',
-                        "value": daqujinli_bumen['name']
+                        "value": whi.data['account']
                     },
                     {
                         "field": 'flowState',
                         "method": "eq",
-                        'type': 'text',
                         "value": [1]
                     },
                 ]
             })
         await errFn(err)
+        print(whi.data['account'])
+        print(start_time, end_time)
+        print("找到数据:", len(res))
         if not res:
             return
 
@@ -129,7 +111,7 @@ async def business(whi):
                     data={
                         'serial_number': {'value': whi.data['serial_number']},  # 流水号
                         'managername': {'value': whi.data['managername']},  # 建档人
-                        'workuser': {'value': JDSerialize.member_err_to_none(value=whi.data, name='workuser')},  # 建档人员
+                        'workuser': {'value': JdySerialize.member_err_to_none(value=whi.data, name='workuser')},  # 建档人员
                         'id': {'value': whi.data['id']},  # 工号
                         'account': {'value': whi.data['account']},  # 终端工号
                         'createddate': {'value': whi.data['createddate']},  # 建档日期
@@ -142,11 +124,12 @@ async def business(whi):
                         'dealercode': {'value': whi.data['dealercode']},  # 经销商代码
                         'contactertel': {'value': whi.data['contactertel']},  # 联系电话
                         'address': {'value': whi.data['address']},  # 终端建档位置
-                        'daqubumen': {'value': daqujinli_bumen['dept_no']},  # 归属大区部门
+                        # 'daqubumen': {'value': daqujinli_bumen['dept_no']},  # 归属大区部门
                     },
                     is_start_workflow=True
                 )
                 await errFn(err)
+                print("创建完毕..")
 
         # 结束时间
         elapsed = (time.perf_counter() - start)

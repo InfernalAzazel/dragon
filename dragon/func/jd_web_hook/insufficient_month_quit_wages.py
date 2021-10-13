@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSerialize, JDSDK
+from yetai import JDSerialize, JDSDK
 
 doc = '''
     
@@ -74,6 +74,8 @@ async def business(whi):
                     ],
                 },
                 data={
+                    'debit_no': {'value': value['jz_no']},  # 工资单的借支单号
+                    'back_write': {'value': '是'},  # 回写
                     'source_form': {'value': form_name},  # 来源表单
                     'jzdh': {'value': jzdh},  # 来源单号
                     'jzje': {'value': money},  # 金额

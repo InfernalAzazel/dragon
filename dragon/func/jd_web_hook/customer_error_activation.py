@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
-from lunar_you_ying import JDSDK
+from robak import Jdy
 from conf import Settings
 
 doc = '''
@@ -19,7 +19,7 @@ def register(router: APIRouter):
     @router.post('/customer-error-activation', tags=['异常客户激活申请处理'], description=doc)
     async def customer_error_activation(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -42,7 +42,7 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         # 业务管理 ID 和 客户档案 ID
-        jd = JDSDK(
+        jd = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='5dd102e307747e0006801bee',
             api_key=Settings.JD_API_KEY,

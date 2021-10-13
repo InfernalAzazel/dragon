@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 from conf import Settings
-from lunar_you_ying import JDSDK
+from robak import Jdy
 
 
 class Inputs(BaseModel):
@@ -39,7 +39,7 @@ def register(router: APIRouter):
                 return
         if token != Settings.DRAGON_TOKEN:
             return 'fail', 401
-        jd = JDSDK.auto_init(
+        jdy = Jdy.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_BUSINESS,
                 Settings.JD_APP_ID_BUSINESS,
@@ -59,12 +59,12 @@ def register(router: APIRouter):
             api_key=Settings.JD_API_KEY,
         )
 
-        jd_store_archives_form_1 = jd[0]
-        jd_store_archives_form_2 = jd[1]
-        jd_store_archives_form_3 = jd[2]
-        jd_store_archives_form_4 = jd[3]
-        jd_store_archives_form_5 = jd[4]
-        jd_store_archives_form_6 = jd[5]
+        jd_store_archives_form_1 = jdy[0]
+        jd_store_archives_form_2 = jdy[1]
+        jd_store_archives_form_3 = jdy[2]
+        jd_store_archives_form_4 = jdy[3]
+        jd_store_archives_form_5 = jdy[4]
+        jd_store_archives_form_6 = jdy[5]
 
         if inputs.source_form == '1':
             res, err = await jd_store_archives_form_1.get_form_data(

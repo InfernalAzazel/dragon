@@ -40,3 +40,8 @@ from func.jd_web_hook import sales_volume_wages
 from func.jd_web_hook import special_application
 from func.jd_web_hook import m_a_s_l_m_industry_agent
 from func.jd_web_hook import m_p_payment_deduction_date
+from func.jd_web_hook import b_o_borrowing_expenses_apply
+from func.jd_web_hook import customer_actual_sales_checklist
+from func.jd_web_hook import c_r_amount_transition_table
+from func.jd_web_hook import repair_customer_c_d_apply
+from func.jd_web_hook import customer_business_accounting_apply

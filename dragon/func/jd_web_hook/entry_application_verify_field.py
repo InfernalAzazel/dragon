@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK
+from robak import Jdy, JdySerialize
 
 doc = '''
 
@@ -28,7 +28,7 @@ def register(router: APIRouter):
     @router.post('/entry_application/verify-field', tags=['入职申请表单-校验字段重复'], description=doc)
     async def entry_application_verify_field(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -51,7 +51,7 @@ async def business(whi):
     # 启动时间
     start = time.perf_counter()
     # 入职申请表单
-    entry_application_form = JDSDK(
+    entry_application_form = Jdy(
         app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
         entry_id='5df73f5ca667c000067cd60c',
         api_key=Settings.JD_API_KEY,

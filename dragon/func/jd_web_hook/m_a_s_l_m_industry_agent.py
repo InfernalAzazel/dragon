@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK
+from yetai import JDSDK
 
 doc = '''
     修改市场、业代销量级别申请 -> 流程完成 -> 触发

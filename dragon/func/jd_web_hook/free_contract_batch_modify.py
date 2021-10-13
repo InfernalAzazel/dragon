@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
-from lunar_you_ying import JDSerialize, JDSDK
+from yetai import JDSerialize, JDSDK
 from conf import Settings
 
 doc = '''

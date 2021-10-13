@@ -1,6 +1,6 @@
 from typing import Optional
 
-from lunar_you_ying import JDSDK
+from robak import Jdy
 from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 
@@ -31,7 +31,7 @@ def register(router: APIRouter):
         if item.activity_code is not None:
 
             # 活动延期申请
-            activity_apply_form = JDSDK(
+            activity_apply_form = Jdy(
                 Settings.JD_APP_ID_BUSINESS,
                 '60df03e9200c6a00072fdb4d',
                 Settings.JD_API_KEY,

@@ -1,6 +1,6 @@
 import time
 
-from lunar_you_ying import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
@@ -18,7 +18,7 @@ def register(router: APIRouter):
     @router.post('/b-r-net-growth-reward', tags=['业代净增加人员奖励'], description=doc)
     async def b_r_net_growth_reward(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -43,7 +43,7 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
         # 异步模式-使用简道云接口 单表单
-        asy_jd = JDSDK(
+        jdy = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='5e3a7d0ac3668d00063776fe',
             api_key=Settings.JD_API_KEY,
@@ -60,18 +60,18 @@ async def business(whi):
         }
         if whi.data['reward_type'] == '拨款营业所工资':
             data = {
-                'person': {"value": JDSerialize.member_err_to_none(whi.data, 'person')},  # 提交人
+                'person': {"value": JdySerialize.member_err_to_none(whi.data, 'person')},  # 提交人
                 'write_date': {"value": whi.data['updateTime']},  # 更新时间
                 'out_type': {"value": '从总经办预提调出'},
-                'marketing_dept': {"value": JDSerialize.department_err_to_none(whi.data, 'marketing_dept')},  # 归属营销总监
+                'marketing_dept': {"value": JdySerialize.department_err_to_none(whi.data, 'marketing_dept')},  # 归属营销总监
                 'marketing_dept_t': {"value": '营销总监'},  # 归属营销总监（名称）
                 'marketing_dept_u8': {"value": '109'},
                 'money_7': {"value": whi.data['money_7']},
                 'in_type': {"value": '调入营业所工资'},
-                'business_office_dept': {"value": JDSerialize.department_err_to_none(whi.data, 'business_office_dept')},
+                'business_office_dept': {"value": JdySerialize.department_err_to_none(whi.data, 'business_office_dept')},
                 'to_b_o_u8_dept': {"value": whi.data['to_b_o_u8_dept']},
-                'fuzong_bumen': {"value": JDSerialize.department_err_to_none(whi.data, 'fuzong_bumen')},
-                'fuzongjian_bumen': {"value": JDSerialize.department_err_to_none(whi.data, 'fuzongjian_bumen')},
+                'fuzong_bumen': {"value": JdySerialize.department_err_to_none(whi.data, 'fuzong_bumen')},
+                'fuzongjian_bumen': {"value": JdySerialize.department_err_to_none(whi.data, 'fuzongjian_bumen')},
                 'transfer_in_salary': {"value": whi.data['money_7']},
                 'reason': {"value": '业代净增加人员奖励' + whi.data['source_no']},
                 'all_money_4': {"value": whi.data['money_7']},
@@ -81,10 +81,10 @@ async def business(whi):
             }
         else:
             data = {
-                'person': {"value": JDSerialize.member_err_to_none(whi.data, 'person')},  # 提交人
+                'person': {"value": JdySerialize.member_err_to_none(whi.data, 'person')},  # 提交人
                 'write_date': {"value": whi.data['updateTime']},  # 更新时间
                 'out_type': {"value": '从总经办预提调出'},
-                'marketing_dept': {"value": JDSerialize.department_err_to_none(whi.data, 'marketing_dept')},  # 归属营销总监
+                'marketing_dept': {"value": JdySerialize.department_err_to_none(whi.data, 'marketing_dept')},  # 归属营销总监
                 'marketing_dept_t': {"value": '营销总监'},  # 归属营销总监（名称）
                 'money_7': {"value": whi.data['personal_money']},
                 'marketing_dept_u8': {"value": '109'},
@@ -98,10 +98,10 @@ async def business(whi):
             }
 
         # 业务管理 -> 费用调拨申请单 如果存在则删除
-        _, err = await asy_jd.query_delete_one(data_filter=data_filter)
+        _, err = await jdy.query_delete_one(data_filter=data_filter)
         await errFn(err)
         # 业务管理 -> 费用调拨申请单 如果存在则跟更新，不存在则创建
-        _, err = await asy_jd.query_update_data_one(
+        _, err = await jdy.query_update_data_one(
             data_filter=data_filter,
             data=data,
             is_start_workflow=True,

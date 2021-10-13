@@ -5,7 +5,7 @@ from loguru import logger
 
 from conf import Settings
 from func.jd_web_hook import WebHookItem
-from lunar_you_ying import JDSDK, JDSerialize
+from yetai import JDSDK, JDSerialize
 
 doc = '''
     修改工资缴纳工资扣款日期 -> 流程完成 -> 触发

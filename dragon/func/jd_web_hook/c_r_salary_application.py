@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from lunar_you_ying import JDSDK
+from robak import Jdy
 
 doc = '''
     结案离职工资申请-修改多个表单 -> 流程完成 -> 触发
@@ -22,7 +22,7 @@ def register(router: APIRouter):
     @router.post('/c-r-salary-application', tags=['结案离职工资申请-修改多个表单'], description=doc)
     async def c_r_salary_application(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -45,7 +45,7 @@ async def business(whi: WebHookItem):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
-        jd = JDSDK.auto_init(
+        jd = Jdy.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_BUSINESS,
                 Settings.JD_APP_ID_BUSINESS,
