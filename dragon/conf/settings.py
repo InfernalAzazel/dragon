@@ -4,11 +4,6 @@ class Settings:
     # API 认证
     DRAGON_TOKEN = 'eYhUCuXBGaqv6AeD2W1X3PwC'
 
-    # 腾龙微服务 --------------------------------------------
-    # 基本的 URL
-    MCC_BASIC_URL = "http://127.0.0.1:8888"
-    MCC_BASIC_TOKEN = 'jAz2hk5pdOtqMwLz2ZkgP80Q'
-
     # 简道云 -------------------------------------------------
     # API 认证密钥
     JD_API_KEY = 'Q20Prk3r78ih4w0ZYOr6iEFfj9g6cEk0'

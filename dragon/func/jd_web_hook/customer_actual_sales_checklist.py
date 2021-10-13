@@ -339,138 +339,141 @@ async def business(whi):
                 await errFn(err)
 
         # 新客户实销量奖励核算申请
-        if whi.data['total_self_sales'] > 0:
-            jdy4 = jdy_list[4]
+        if whi.data['total_self_sales'] is None:
+            pass
+        else:
+            if whi.data['total_self_sales'] > 0:
+                jdy4 = jdy_list[4]
 
-            if whi.data['self_sales_subform']:
-                self_sales = whi.data['self_sales_subform'][0]
+                if whi.data['self_sales_subform']:
+                    self_sales = whi.data['self_sales_subform'][0]
 
-                subform = [
-                    {
-                        '_id': '60bf5e3456262300083b2001',
-                        's_xl': '小口口淳礼盒系列',
-                        's_sxl': none_to_0(self_sales['s_1']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2002',
-                        's_xl': '大口口淳系列',
-                        's_sxl': none_to_0(self_sales['s_2']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2003',
-                        's_xl': '罗伯克系列',
-                        's_sxl': none_to_0(self_sales['s_3']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2004',
-                        's_xl': '捷虎系列',
-                        's_sxl': none_to_0(self_sales['s_4']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2005',
-                        's_xl': '大椰泰系列',
-                        's_sxl': none_to_0(self_sales['s_5']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2006',
-                        's_xl': '小椰泰标箱系列',
-                        's_sxl': none_to_0(self_sales['s_6']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2007',
-                        's_xl': '小椰泰礼盒系列',
-                        's_sxl': none_to_0(self_sales['s_7']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2008',
-                        's_xl': '小轻甘系列',
-                        's_sxl': none_to_0(self_sales['s_8']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b2009',
-                        's_xl': '艾尔牧系列',
-                        's_sxl': none_to_0(self_sales['s_9']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b20010',
-                        's_xl': '杯装果汁椰汁系列',
-                        's_sxl': none_to_0(self_sales['s_10']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b20011',
-                        's_xl': '果以鲜系列',
-                        's_sxl': none_to_0(self_sales['s_11']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b20012',
-                        's_xl': '方盒系列',
-                        's_sxl': none_to_0(self_sales['s_12']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b20013',
-                        's_xl': '高端方盒系列',
-                        's_sxl': none_to_0(self_sales['s_13']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                    {
-                        '_id': '60bf5e3456262300083b20014',
-                        's_xl': '特级系列',
-                        's_sxl': none_to_0(self_sales['s_14']),
-                        's_khzt': None,
-                        's_zxljl': None
-                    },
-                ]
-                data = {
-                    'serial_number': {'value': whi.data['serial_number']},
-                    'gz_date': {'value': gz_date},
-                    'gz_nianyue': {'value': gz_nianyue},
-                    'customer_code': {'value': customer_code},
-                    'customer_name': {'value': customer_name},
-                    'sx_years_code': {'value': sx_years_code},
-                    'reward_method': {'value': '自销量奖励'},
-                    'total_self_sales': {'value': whi.data['total_self_sales']},
-                    'self_sales_subform': JdySerialize.subform('self_sales_subform', subform)['self_sales_subform'],
-                }
-                _, err = await jdy4.query_update_data_one(
-                    data_filter={
-                        "cond": [
-                            {
-                                "field": 'serial_number',
-                                "method": "eq",
-                                "value": whi.data['serial_number']  # 唯一值
-                            },
-                        ],
-                    },
-                    data=data,
-                    non_existent_create=True,
-                    is_start_workflow=True
-                )
-                await errFn(err)
+                    subform = [
+                        {
+                            '_id': '60bf5e3456262300083b2001',
+                            's_xl': '小口口淳礼盒系列',
+                            's_sxl': none_to_0(self_sales['s_1']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2002',
+                            's_xl': '大口口淳系列',
+                            's_sxl': none_to_0(self_sales['s_2']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2003',
+                            's_xl': '罗伯克系列',
+                            's_sxl': none_to_0(self_sales['s_3']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2004',
+                            's_xl': '捷虎系列',
+                            's_sxl': none_to_0(self_sales['s_4']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2005',
+                            's_xl': '大椰泰系列',
+                            's_sxl': none_to_0(self_sales['s_5']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2006',
+                            's_xl': '小椰泰标箱系列',
+                            's_sxl': none_to_0(self_sales['s_6']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2007',
+                            's_xl': '小椰泰礼盒系列',
+                            's_sxl': none_to_0(self_sales['s_7']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2008',
+                            's_xl': '小轻甘系列',
+                            's_sxl': none_to_0(self_sales['s_8']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b2009',
+                            's_xl': '艾尔牧系列',
+                            's_sxl': none_to_0(self_sales['s_9']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b20010',
+                            's_xl': '杯装果汁椰汁系列',
+                            's_sxl': none_to_0(self_sales['s_10']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b20011',
+                            's_xl': '果以鲜系列',
+                            's_sxl': none_to_0(self_sales['s_11']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b20012',
+                            's_xl': '方盒系列',
+                            's_sxl': none_to_0(self_sales['s_12']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b20013',
+                            's_xl': '高端方盒系列',
+                            's_sxl': none_to_0(self_sales['s_13']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                        {
+                            '_id': '60bf5e3456262300083b20014',
+                            's_xl': '特级系列',
+                            's_sxl': none_to_0(self_sales['s_14']),
+                            's_khzt': None,
+                            's_zxljl': None
+                        },
+                    ]
+                    data = {
+                        'serial_number': {'value': whi.data['serial_number']},
+                        'gz_date': {'value': gz_date},
+                        'gz_nianyue': {'value': gz_nianyue},
+                        'customer_code': {'value': customer_code},
+                        'customer_name': {'value': customer_name},
+                        'sx_years_code': {'value': sx_years_code},
+                        'reward_method': {'value': '自销量奖励'},
+                        'total_self_sales': {'value': whi.data['total_self_sales']},
+                        'self_sales_subform': JdySerialize.subform('self_sales_subform', subform)['self_sales_subform'],
+                    }
+                    _, err = await jdy4.query_update_data_one(
+                        data_filter={
+                            "cond": [
+                                {
+                                    "field": 'serial_number',
+                                    "method": "eq",
+                                    "value": whi.data['serial_number']  # 唯一值
+                                },
+                            ],
+                        },
+                        data=data,
+                        non_existent_create=True,
+                        is_start_workflow=True
+                    )
+                    await errFn(err)
 
         # 生成主表 客户实销量核对过渡表
         for v in b_subform:
