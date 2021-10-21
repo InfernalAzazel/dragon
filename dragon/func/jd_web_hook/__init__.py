@@ -45,3 +45,5 @@ from func.jd_web_hook import customer_actual_sales_checklist
 from func.jd_web_hook import c_r_amount_transition_table
 from func.jd_web_hook import repair_customer_c_d_apply
 from func.jd_web_hook import customer_business_accounting_apply
+from func.jd_web_hook import induction_apply2
+from func.jd_web_hook import modify_work_date2

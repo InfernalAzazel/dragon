@@ -54,71 +54,75 @@ async def business(whi):
         filling_time = whi.data['filling_time']
         customer_name = whi.data['customer_name']
         customer_code = whi.data['customer_code']
-        money = whi.data['money']
+        money = whi.data['money']  # 本月补差金额合计
         qujili_u8_code = whi.data['qujili_u8_code']
         zhuguan_no = whi.data['zhuguan_no']
         abstract = f'{whi.data["source_no"]} [{whi.data["is_paymentis_for_goods"]}] 补{hs_time.month}月客户业代提成差额'
 
-        res, err = await jdy.get_form_data(
-            data_filter={
-                "cond": [
+        if money is None:
+            pass
+        else:
+            if money > 0:
+                res, err = await jdy.get_form_data(
+                    data_filter={
+                        "cond": [
+                            {
+                                "field": 'source_no',
+                                "type": 'text',
+                                "method": "eq",
+                                "value": whi.data['source_no']  # 申请批号
+                            }
+                        ]
+                    })
+                await errFn(err)
+                subform = [
                     {
-                        "field": 'source_no',
-                        "type": 'text',
-                        "method": "eq",
-                        "value": whi.data['source_no']  # 申请批号
+                        '_id': '60bf5e91ff26fc00077e2f9d',
+                        'r_fx': '借',
+                        'r_km_code': '236',
+                        'r_money': money,
+                        'r_bm_code': qujili_u8_code,
+                        'r_zhuguan_no': zhuguan_no,
+                        'r_abstract': abstract,
                     }
                 ]
-            })
-        await errFn(err)
-        subform = [
-            {
-                '_id': '60bf5e91ff26fc00077e2f9d',
-                'r_fx': '借',
-                'r_km_code': '236',
-                'r_money': money,
-                'r_bm_code': qujili_u8_code,
-                'r_zhuguan_no': zhuguan_no,
-                'r_abstract': abstract,
-            }
-        ]
-        if res:
-            _, err = await jdy.update_data(
-                dataId=res[0]['_id'],
-                data={
-                    'source_no': {'value': source_no},
-                    'is_handle': {'value': '是'},
-                    'source_form': {'value': '补客户业代提成差额申请'},
-                    'filling_time': {'value': filling_time},
-                    'customer_name': {'value': customer_name},
-                    'customer_code': {'value': customer_code},
-                    'km_code': {'value': '122'},
-                    'money': {'value': money},
-                    'qujili_u8_code': {'value': qujili_u8_code},
-                    'zhuguan_no': {'value': zhuguan_no},
-                    'abstract': {'value': abstract},
-                    'receivable': JDSerialize.subform('receivable', subform)['receivable'],
-                })
-            await errFn(err)
-        else:
-            _, err = await jdy.create_data(
-                data={
-                    'source_no': {'value': source_no},
-                    'is_handle': {'value': '否'},
-                    'source_form': {'value': '补客户业代提成差额申请'},
-                    'filling_time': {'value': filling_time},
-                    'customer_name': {'value': customer_name},
-                    'customer_code': {'value': customer_code},
-                    'km_code': {'value': '122'},
-                    'money': {'value': money},
-                    'qujili_u8_code': {'value': qujili_u8_code},
-                    'zhuguan_no': {'value': zhuguan_no},
-                    'abstract': {'value': abstract},
-                    'receivable': JDSerialize.subform('receivable', subform)['receivable'],
-                },
-                is_start_workflow=True
-            )
-            await errFn(err)
+                if res:
+                    _, err = await jdy.update_data(
+                        dataId=res[0]['_id'],
+                        data={
+                            'source_no': {'value': source_no},
+                            'is_handle': {'value': '是'},
+                            'source_form': {'value': '补客户业代提成差额申请'},
+                            'filling_time': {'value': filling_time},
+                            'customer_name': {'value': customer_name},
+                            'customer_code': {'value': customer_code},
+                            'km_code': {'value': '122'},
+                            'money': {'value': money},
+                            'qujili_u8_code': {'value': qujili_u8_code},
+                            'zhuguan_no': {'value': zhuguan_no},
+                            'abstract': {'value': abstract},
+                            'receivable': JDSerialize.subform('receivable', subform)['receivable'],
+                        })
+                    await errFn(err)
+                else:
+                    _, err = await jdy.create_data(
+                        data={
+                            'source_no': {'value': source_no},
+                            'is_handle': {'value': '否'},
+                            'source_form': {'value': '补客户业代提成差额申请'},
+                            'filling_time': {'value': filling_time},
+                            'customer_name': {'value': customer_name},
+                            'customer_code': {'value': customer_code},
+                            'km_code': {'value': '122'},
+                            'money': {'value': money},
+                            'qujili_u8_code': {'value': qujili_u8_code},
+                            'zhuguan_no': {'value': zhuguan_no},
+                            'abstract': {'value': abstract},
+                            'receivable': JDSerialize.subform('receivable', subform)['receivable'],
+                        },
+                        is_start_workflow=True
+                    )
+                    await errFn(err)
         # 结束时间
         elapsed = (time.perf_counter() - start)
         logger.info(f'[+] 程序处理耗时 {elapsed}s')

@@ -177,11 +177,11 @@ async def business(whi):
                     'person_no': {'value': v['b_person_no']},
                     'nianyuegh': {'value': v['b_nianyuegh']},
                     'gzjb': {'value': v['b_gzjb']},
-                    'subtotal': {'value': v['b_15']},
+                    # 'subtotal': {'value': v['b_15']},
                     'business': JdySerialize.subform('business', b)['business'],
                 }
-                jdy = jdy_list[1]
-                res, err = await jdy.get_form_data(
+                jdy1 = jdy_list[1]
+                res, err = await jdy1.get_form_data(
                     data_filter={
                         "cond": [
                             {
@@ -195,13 +195,13 @@ async def business(whi):
                 )
                 await errFn(err)
                 if res:
-                    _, err = await jdy.update_data(
+                    _, err = await jdy1.update_data(
                         dataId=res[0]['_id'],
                         data=data
                     )
                     await errFn(err)
                 else:
-                    _, err = await jdy.create_data(
+                    _, err = await jdy1.create_data(
                         data=data,
                         is_start_workflow=True,
                     )
@@ -232,7 +232,7 @@ async def business(whi):
                     'sx_years_code': {'value': sx_years_code},
                     'customer_code': {'value': customer_code},
                     'customer_name': {'value': customer_name},
-                    'total': {'value': v['b_15']},
+                    # 'total': {'value': v['b_15']},
                     'total_sales': {'value': total_sales},
                     'person': {'value': JdySerialize.member_err_to_none(v, 'b_person')},
                     'person_name': {'value': v['b_person_name']},
@@ -242,8 +242,8 @@ async def business(whi):
                     'business': JdySerialize.subform('business', b)['business'],
                 }
 
-                jdy = jdy_list[3]
-                res, err = await jdy.get_form_data(
+                jdy3 = jdy_list[3]
+                res, err = await jdy3.get_form_data(
                     data_filter={
                         "cond": [
                             {
@@ -257,13 +257,13 @@ async def business(whi):
                 )
                 await errFn(err)
                 if res:
-                    _, err = await jdy.update_data(
+                    _, err = await jdy3.update_data(
                         dataId=res[0]['_id'],
                         data=data
                     )
                     await errFn(err)
                 else:
-                    _, err = await jdy.create_data(
+                    _, err = await jdy3.create_data(
                         data=data,
                         is_start_workflow=True,
                     )
@@ -304,7 +304,7 @@ async def business(whi):
 
         if c_list and s_list:
 
-            jdy = jdy_list[2]
+            jdy2 = jdy_list[2]
 
             data = {
                 'serial_number': {'value': whi.data['serial_number']},
@@ -315,7 +315,7 @@ async def business(whi):
                 'dx_content': JdySerialize.subform('dx_content', s_list)['dx_content'],
                 'business': JdySerialize.subform('business', c_list)['business'],
             }
-            res, err = await jdy.get_form_data(
+            res, err = await jdy2.get_form_data(
                 data_filter={
                     "cond": [
                         {
@@ -326,13 +326,13 @@ async def business(whi):
             )
             await errFn(err)
             if res:
-                _, err = await jdy.update_data(
+                _, err = await jdy2.update_data(
                     dataId=res[0]['_id'],
                     data=data
                 )
                 await errFn(err)
             else:
-                _, err = await jdy.create_data(
+                _, err = await jdy2.create_data(
                     data=data,
                     is_start_workflow=True,
                 )
@@ -484,6 +484,7 @@ async def business(whi):
                 'sx_years_code': {'value': sx_years_code},
                 'customer_code': {'value': customer_code},
                 'customer_name': {'value': customer_name},
+                'subtotal': {'value': v['b_15']},
                 'total_sales': {'value': total_sales},
                 'b_person': {'value': JdySerialize.member_err_to_none(v, 'b_person')},
                 'b_person_name': {'value': v['b_person_name']},
