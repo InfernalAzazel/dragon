@@ -99,9 +99,9 @@ async def business(whi):
                 ]
             })
         await errFn(err)
-        print(whi.data['account'])
-        print(start_time, end_time)
-        print("找到数据:", len(res))
+        # print(whi.data['account'])
+        # print(start_time, end_time)
+        # print("找到数据:", len(res))
         if not res:
             return
 

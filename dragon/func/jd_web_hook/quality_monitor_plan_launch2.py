@@ -1,6 +1,6 @@
 import time
 
-from yetai import JDSDK
+from robak import Jdy
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
@@ -18,7 +18,7 @@ def register(router: APIRouter):
     @router.post('/quality-monitor-plan-launch2', tags=['质量监控计划'], description=doc)
     async def quality_monitor_plan_launch2(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -40,7 +40,7 @@ async def business(whi: WebHookItem):
     # 启动时间
     start = time.perf_counter()
     # 异步模式-使用简道云接口 单表单
-    asy_jd = JDSDK(
+    asy_jd = Jdy(
         app_id=Settings.JD_APP_ID_QUALITY,
         entry_id='60f28718598cae0008105cae',
         api_key=Settings.JD_API_KEY,

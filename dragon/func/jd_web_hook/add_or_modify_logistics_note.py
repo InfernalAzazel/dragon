@@ -61,24 +61,16 @@ async def business(whi):
         if res:
             await logistics_note_form.update_data(dataId=res[0]['_id'], data={
                 # 注意事项
-                'note': {
-                    'value': whi.data['note']
-                },
+                'note': {'value': whi.data['note']},
             })
         else:
             _, err = await logistics_note_form.create_data(data={
                 # 填单日期
-                'time_date': {
-                    'value': whi.data['time_date']
-                },
+                'time_date': {'value': whi.data['time_date']},
                 # 客户代码
-                'customer_code': {
-                    'value': whi.data['customer_code']
-                },
+                'customer_code': {'value': whi.data['customer_code']},
                 # 注意事项
-                'note': {
-                    'value': whi.data['note']
-                },
+                'note': {'value': whi.data['note']},
             })
             await errFn(err)
         # 结束时间

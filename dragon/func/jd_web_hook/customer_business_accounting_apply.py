@@ -8,7 +8,7 @@ from conf import Settings
 from func.jd_web_hook.models import WebHookItem
 
 doc = '''
-    新客户实销量奖励核算申请 -> 流程完成 -> 触发
+    客户自销量奖励核算申请 -> 流程完成 -> 触发
 
     目标表单：
     
@@ -18,7 +18,7 @@ doc = '''
 
 
 def register(router: APIRouter):
-    @router.post('/customer_business_accounting_apply', tags=['新客户实销量奖励核算申请-U8应收单过渡表'], description=doc)
+    @router.post('/customer_business_accounting_apply', tags=['客户自销量奖励核算申请-U8应收单过渡表'], description=doc)
     async def customer_business_accounting_apply(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
         if req.headers['x-jdy-signature'] != Jdy.get_signature(

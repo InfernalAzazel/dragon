@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
-from yetai import JDSerialize, JDSDK
+from robak import Jdy, JdySerialize
 from conf import Settings
 
 doc = '''
@@ -17,7 +17,7 @@ def register(router: APIRouter):
     @router.post('/free-contract-batch-modify', tags=['无忧合批量修改表'], description=doc)
     async def free_contract_batch_modify(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -43,7 +43,7 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
         # 人员档案
-        personnel_files_form = JDSDK(
+        personnel_files_form = Jdy(
             app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
             entry_id='5df7a704c75c0e00061de8f6',
             api_key=Settings.JD_API_KEY,
@@ -65,7 +65,7 @@ async def business(whi):
         await errFn(err)
 
         if res:
-            subform = JDSerialize.subform(subform_field='signing_status', data=whi.data['signing_status'])
+            subform = JdySerialize.subform(subform_field='signing_status', data=whi.data['signing_status'])
             data = {
                 # 合同编号
                 'contract_number': {

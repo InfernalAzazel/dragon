@@ -47,3 +47,4 @@ from func.jd_web_hook import repair_customer_c_d_apply
 from func.jd_web_hook import customer_business_accounting_apply
 from func.jd_web_hook import induction_apply2
 from func.jd_web_hook import modify_work_date2
+from func.jd_web_hook import quality_monitor_plan_launch3

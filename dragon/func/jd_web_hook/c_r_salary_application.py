@@ -106,17 +106,11 @@ async def business(whi: WebHookItem):
                     ]},
                 data={
                     # 流水号
-                    'closing_application_no': {
-                        'value': whi.data['source_no']
-                    },
+                    'closing_application_no': {'value': whi.data['source_no']},
                     # 结案日期
-                    'u8_date': {
-                        'value': whi.data['close_date']
-                    },
+                    'u8_date': {'value': whi.data['close_date']},
                     # 结案年月
-                    'u8_years': {
-                        'value': whi.data['close_yearm']
-                    },
+                    'u8_years': {'value': whi.data['close_yearm']},
                 }
             )
             await errFn(err)

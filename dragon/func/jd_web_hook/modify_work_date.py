@@ -7,7 +7,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
 
@@ -32,7 +32,7 @@ def register(router: APIRouter):
     @router.post('/modify-work-date', tags=['修改正式上班日期申请'], description=doc)
     async def modify_work_date(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -56,7 +56,7 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         # 人事管理
-        jd = JDSDK.auto_init(
+        jdy = Jdy.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
                 Settings.JD_APP_ID_BUSINESS
@@ -71,7 +71,7 @@ async def business(whi):
         if whi.data['change_type']:
             if whi.data['change_type'] == '修改离职时间':
                 # 人员档案
-                jd_personnel_files_form = jd[0]
+                jd_personnel_files_form = jdy[0]
                 res, err = await jd_personnel_files_form.get_form_data(
                     data_filter={
                         "cond": [
@@ -99,7 +99,7 @@ async def business(whi):
                         yetai_quit_sub_table[-1] = yetai_quit_sub_json
                         data = {
                             'yetai_quit_sub_table':
-                                JDSerialize.subform(subform_field='yetai_quit_sub_table', data=yetai_quit_sub_table)[
+                                JdySerialize.subform(subform_field='yetai_quit_sub_table', data=yetai_quit_sub_table)[
                                     'yetai_quit_sub_table']
                         }
                     else:
@@ -113,13 +113,13 @@ async def business(whi):
                         free_quit_sub_table[-1] = free_quit_sub_json
                         data = {
                             'free_quit_sub_table':
-                                JDSerialize.subform(subform_field='free_quit_sub_table', data=free_quit_sub_table)[
+                                JdySerialize.subform(subform_field='free_quit_sub_table', data=free_quit_sub_table)[
                                     'free_quit_sub_table']
                         }
                     _, err = await jd_personnel_files_form.update_data(dataId=res[0]['_id'], data=data)
                     await errFn(err)
                 # 考勤记录表
-                jd_attendance_record_form = jd[1]
+                jd_attendance_record_form = jdy[1]
                 start_time = whi.data['entry_date']
                 end_time = whi.data['quit_time']
 

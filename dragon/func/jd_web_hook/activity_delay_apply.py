@@ -65,17 +65,11 @@ async def business(whi):
         if res:
             _, err = await activity_apply_form.update_data(dataId=res[0]['_id'], data={
                 # 活动截止日期
-                'enddate': {
-                    'value': whi.data['activity_delay_date']
-                },
+                'enddate': {'value': whi.data['activity_delay_date']},
                 # 申请日期
-                'id': {
-                    'value': whi.data['id']
-                },
+                'id': {'value': whi.data['id']},
                 # 申请日期
-                'apply_years': {
-                    'value': whi.data['apply_years']
-                },
+                'apply_years': {'value': whi.data['apply_years']},
             })
             await errFn(err)
         # 结束时间

@@ -339,10 +339,10 @@ async def business(whi):
                 await errFn(err)
 
         # 新客户实销量奖励核算申请
-        if whi.data['total_self_sales'] is None:
+        if whi.data['balance_payment'] is None:
             pass
         else:
-            if whi.data['total_self_sales'] > 0:
+            if whi.data['balance_payment'] > 0:
                 jdy4 = jdy_list[4]
 
                 if whi.data['self_sales_subform']:
