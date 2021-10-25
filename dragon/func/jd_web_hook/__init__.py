@@ -48,3 +48,5 @@ from func.jd_web_hook import customer_business_accounting_apply
 from func.jd_web_hook import induction_apply2
 from func.jd_web_hook import modify_work_date2
 from func.jd_web_hook import quality_monitor_plan_launch3
+from func.jd_web_hook import customer_actual_sales_checklist2
+from func.jd_web_hook import customer_actual_sales_checklist3
