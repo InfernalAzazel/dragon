@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
     
@@ -20,7 +20,7 @@ def register(router: APIRouter):
     @router.post('/promoter-wages', tags=['促销员直营业代工资-创建数据到->工资扣款（主表）'], description=doc)
     async def promoter_wages(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -32,11 +32,16 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi):
-
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -49,7 +54,7 @@ async def business(whi):
         deduction = whi.data['jz_content']  # 扣款子表
 
         # 工资扣款（主表）
-        jd = JDSDK(
+        jd = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='6107694c948a220008d383ad',
             api_key=Settings.JD_API_KEY,
@@ -81,7 +86,7 @@ async def business(whi):
                     'jzdh': {'value': jzdh},  # 来源单号
                     'jzje': {'value': money},  # 金额
                     'jzzy': {'value': value['jz_zhaiyao']},  # 摘要
-                    'jzr': {'value': JDSerialize.member_err_to_none(value, 'person')},  # 姓名
+                    'jzr': {'value': JdySerialize.member_err_to_none(value, 'person')},  # 姓名
                     'jzr_wb': {'value': value['jzr_wb']},  # 姓名（文本）
                     'jzrgh': {'value': value['jz_person_code']},  # 工号
                     # 'gsbm': {'value': [value['gsbm'][0]['dept_no']]},  # 归属部门
@@ -100,7 +105,7 @@ async def business(whi):
         deduction = whi.data['jz_content']  # 扣款子表
 
         # 工资扣款（主表）
-        jd = JDSDK(
+        jd = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='6107694c948a220008d383ad',
             api_key=Settings.JD_API_KEY,

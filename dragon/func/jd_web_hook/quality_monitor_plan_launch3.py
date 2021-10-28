@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 
@@ -29,7 +29,7 @@ def register(router: APIRouter):
     @router.post('/quality-monitor-plan-launch3', tags=['质量监控计划基础信息'], description=doc)
     async def quality_monitor_plan_launch(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -42,10 +42,16 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi: WebHookItem):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -61,7 +67,7 @@ async def business(whi: WebHookItem):
         except:
             e_w_lead_time = 0
 
-        jdy = JDSDK(
+        jdy = Jdy(
             app_id=Settings.JD_APP_ID_QUALITY,
             entry_id='5e5237ef41f7ae000678f0b4',  # 质量监控计划执行
             api_key=Settings.JD_API_KEY,
@@ -117,8 +123,8 @@ async def business(whi: WebHookItem):
                     data={
                         'cycle': {'value': whi.data['cycle']},
                         'e_w_lead_time': {'value': whi.data['e_w_lead_time']},
-                        'dispatch': {'value': JDSerialize.member_array_err_to_none(whi.data, 'dispatch')},
-                        'supervisor': {'value': JDSerialize.member_array_err_to_none(whi.data, 'supervisor')},
+                        'dispatch': {'value': JdySerialize.member_array_err_to_none(whi.data, 'dispatch')},
+                        'supervisor': {'value': JdySerialize.member_array_err_to_none(whi.data, 'supervisor')},
                         'current_date': {'value': current_date},
                         'next_date': {'value': next_date},
                         'lowest_data': {'value': lowest_data},

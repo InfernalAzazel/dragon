@@ -28,15 +28,21 @@ def register(router: APIRouter):
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -46,7 +52,7 @@ async def business(whi):
         if whi.data['money'] is None:
             pass
         else:
-            if whi.data['money'] > 0 and whi.data['tb_u8'] == '是':
+            if whi.data['money'] > 1 and whi.data['tb_u8'] == '是':
                 jdy = Jdy(
                     app_id=Settings.JD_APP_ID_BUSINESS,
                     entry_id='5facec6b40e1cb00079e03cb',

@@ -8,7 +8,7 @@ from conf import Settings
 from robak import Jdy, JdySerialize
 
 doc = '''
-    客户自销量奖励核算申请 -> 流程完成 -> 触发
+    客户实销量核对单 -> 流程完成 -> 触发
 
     目标表单：
         
@@ -32,15 +32,21 @@ def register(router: APIRouter):
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -61,7 +67,7 @@ async def business(whi):
         customer_name = whi.data['customer_name']
         total_sales = whi.data['total_sales']
         b_subform = whi.data['business']
-
+        print(whi.data)
         # 生成主表 客户实销量核对过渡表
         for v in b_subform:
             data = {

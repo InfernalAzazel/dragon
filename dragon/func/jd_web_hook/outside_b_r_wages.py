@@ -5,7 +5,7 @@ from loguru import logger
 
 from conf import Settings
 from func.jd_web_hook.models import WebHookItem
-from yetai import JDSDK
+from robak import Jdy
 
 doc = '''
 
@@ -18,23 +18,29 @@ def register(router: APIRouter):
     @router.post('/outside-b-r-wages', tags=['省外直营业代工资'], description=doc)
     async def outside_b_r_wages(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
 
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
     # 启动时间
     start = time.perf_counter()
@@ -42,7 +48,7 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         if whi.data['view'] == '否/修改':
             # 异步模式-使用简道云接口 表单
-            asy_jd = JDSDK(
+            asy_jd = Jdy(
                 app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,
                 entry_id='608bf52d1ed68a0007501a54',
                 api_key=Settings.JD_API_KEY,

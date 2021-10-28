@@ -1,3 +1,7 @@
+import os
+
+from robak import JdyLog
+
 
 class Settings:
     # web 服务器 -----------------------------
@@ -21,3 +25,12 @@ class Settings:
     JD_APP_ID_WAREHOUSE_M_SYSTEM = '5e0db1ac3e79d40006ceaedd'
     # 空白区域管理（正式系统）
     JD_APP_ID_BLANK_AREA_MANAGEMENT = '5df633e09a7d50000618e78a'
+    # 配置异常处理
+    log = JdyLog(
+        app_id=JD_APP_ID_BUSINESS,
+        exe_name='dragon',
+        entry_id='617649d05253940008e471d8',
+        api_key=JD_API_KEY,
+        root_path=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+

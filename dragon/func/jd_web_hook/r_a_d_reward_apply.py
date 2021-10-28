@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK
+from robak import Jdy
 
 doc = '''
     
@@ -20,7 +20,7 @@ def register(router: APIRouter):
     @router.post('/r_a_d_reward_apply', tags=['补指定开发奖励申请-创建数据到指定开发奖励申请'], description=doc)
     async def r_a_d_reward_apply(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -32,11 +32,16 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi):
-
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -45,7 +50,7 @@ async def business(whi):
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
         # 指定开发奖励申请过渡表
-        jd = JDSDK(
+        jd = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='61052e6eb23ee70007657cc5',
             api_key=Settings.JD_API_KEY,

@@ -29,19 +29,27 @@ def register(router: APIRouter):
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
+
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
+            return
 
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         createddate = datetime.datetime.strptime(
@@ -129,8 +137,6 @@ async def business(whi):
                     is_start_workflow=True
                 )
                 await errFn(err)
-                print("创建完毕..")
 
         # 结束时间
-        elapsed = (time.perf_counter() - start)
-        logger.info(f'[+] 程序处理耗时 {elapsed}s')
+        Settings.log.print(name=url, info=f'程序处理耗时 {Settings.log.elapsed(start)}s')

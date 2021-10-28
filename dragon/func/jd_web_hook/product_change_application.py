@@ -3,7 +3,7 @@ import time
 from func.jd_web_hook.models import WebHookItem
 from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 from conf import Settings
 
 doc = '''
@@ -21,7 +21,7 @@ def register(router: APIRouter):
     @router.post('/product-change-application', tags=['新增或修改产品信息申请'], description=doc)
     async def product_change_application(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 secret=Settings.JD_SECRET,
                 nonce=req.query_params['nonce'],
                 timestamp=req.query_params['timestamp'],
@@ -35,10 +35,16 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -46,7 +52,7 @@ async def business(whi):
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 
-        jd = JDSDK.auto_init(
+        jd = Jdy.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_BUSINESS,
                 Settings.JD_APP_ID_BUSINESS,
@@ -163,7 +169,7 @@ async def business(whi):
             if not cpp_subform:
                 await customer_profile.update_data(
                     dataId=result[ii]['_id'],
-                    data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
+                    data=JdySerialize.subform(subform_field=customer_profile_product_subform_field,
                                              data=whi_data_subform))
             else:
 
@@ -191,7 +197,7 @@ async def business(whi):
 
                 _, err = await customer_profile.update_data(
                     dataId=result[ii]['_id'],
-                    data=JDSerialize.subform(subform_field=customer_profile_product_subform_field,
+                    data=JdySerialize.subform(subform_field=customer_profile_product_subform_field,
                                              data=cpp_subform))
                 await errFn(err)
 

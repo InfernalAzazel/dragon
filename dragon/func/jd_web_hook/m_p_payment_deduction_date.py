@@ -5,7 +5,7 @@ from loguru import logger
 
 from conf import Settings
 from func.jd_web_hook import WebHookItem
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
     修改工资缴纳工资扣款日期 -> 流程完成 -> 触发
@@ -19,22 +19,29 @@ def register(router: APIRouter):
     @router.post('/m-p-payment-deduction-date', tags=['修改工资缴纳工资扣款日期-修改2个表单'], description=doc)
     async def m_p_payment_deduction_date(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
+            return
 
     # 启动时间
     start = time.perf_counter()
@@ -43,7 +50,7 @@ async def business(whi):
 
         modifySubForm = whi.data['modify_details']
 
-        jd = JDSDK.auto_init(
+        jd = Jdy.auto_init(
             app_id_list=[
                 Settings.JD_APP_ID_BUSINESS,
                 Settings.JD_APP_ID_BUSINESS,
@@ -101,7 +108,7 @@ async def business(whi):
                         deductionSubForm[i]['nygh'] = modify['nygh']
                 _, err = await jd_salary_payment_expenditure_approval_form.update_data(
                     dataId=res[0]['_id'],
-                    data=JDSerialize.subform('deduction', deductionSubForm))
+                    data=JdySerialize.subform('deduction', deductionSubForm))
                 await errFn(err)
         # 结束时间
         elapsed = (time.perf_counter() - start)

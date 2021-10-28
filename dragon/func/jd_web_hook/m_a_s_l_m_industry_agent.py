@@ -5,7 +5,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK
+from robak import Jdy
 
 doc = '''
     修改市场、业代销量级别申请 -> 流程完成 -> 触发
@@ -19,22 +19,28 @@ def register(router: APIRouter):
     @router.post('/m-a-s-l-m-industry-agent', tags=['修改市场、业代销量级别申请-全国区域汇总表'], description=doc)
     async def m_a_s_l_m_industry_agent(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -42,7 +48,7 @@ async def business(whi):
 
     if whi.op == 'data_create':
         # 全国区域汇总表
-        national_regional_summary_form = JDSDK(
+        national_regional_summary_form = Jdy(
             app_id=Settings.JD_APP_ID_BLANK_AREA_MANAGEMENT,
             entry_id='5e168acd24a2980006c49bdb',
             api_key=Settings.JD_API_KEY,

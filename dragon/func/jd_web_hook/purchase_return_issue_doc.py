@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from loguru import logger
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
 
@@ -21,7 +21,7 @@ def register(router: APIRouter):
     @router.post('/purchase-return-issue-doc', tags=['采购退货出库单-创建数据到->物料出库单_总表'], description=doc)
     async def purchase_return_issue_doc(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -33,11 +33,16 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi: WebHookItem):
-
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -46,7 +51,7 @@ async def business(whi: WebHookItem):
     if whi.op == 'data_create':
 
         # 营销_产品出库总表
-        jd = JDSDK(
+        jd = Jdy(
             app_id=Settings.JD_APP_ID_WAREHOUSE_M_SYSTEM,
             entry_id='5eeb0c30494c830006f80d46',
             api_key=Settings.JD_API_KEY,
@@ -70,7 +75,7 @@ async def business(whi: WebHookItem):
                     'only_code': {'value': whi.data["document_type"] + whi.data["a_sales_order_no"]},  # 唯一编号
                     'delivery_date': {'value': whi.data['delivery_date']},  # 出库日期
                     'warehouse': {'value': whi.data['warehouse']},  # 仓库
-                    'delivery_details': JDSerialize.subform(subform_field="delivery_details", data=whi.data['delivery_details'])["delivery_details"],  # 出库明细 子表单
+                    'delivery_details': JdySerialize.subform(subform_field="delivery_details", data=whi.data['delivery_details'])["delivery_details"],  # 出库明细 子表单
                     'remarks': {'value': whi.data['remarks']},  # 备注
 
                 },

@@ -16,8 +16,6 @@ doc = '''
         实销量/发货量工资单
         底薪业代工资
         自由业代奖励核对
-        新客户实销量奖励核算申请
-        客户实销量核对过渡表
     
     新增或修改: 
         
@@ -37,15 +35,21 @@ def register(router: APIRouter):
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间

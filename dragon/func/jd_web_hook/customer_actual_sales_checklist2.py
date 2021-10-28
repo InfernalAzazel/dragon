@@ -8,7 +8,7 @@ from conf import Settings
 from robak import Jdy, JdySerialize
 
 doc = '''
-    客户自销量奖励核算申请 -> 流程完成 -> 触发
+    客户实销量核对单 -> 流程完成 -> 触发
 
     目标表单：
         
@@ -32,15 +32,21 @@ def register(router: APIRouter):
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
         return '2xx'
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
@@ -60,18 +66,26 @@ async def business(whi):
         sx_years_code = whi.data['sx_years_code']
         customer_code = whi.data['customer_code']
         customer_name = whi.data['customer_name']
-        total_sales = whi.data['total_sales']
-        b_subform = whi.data['business']
 
         # 新客户实销量奖励核算申请
         if whi.data['balance_payment'] is None:
             pass
         else:
             if whi.data['balance_payment'] > 0:
+                data = {
+                    'serial_number': {'value': whi.data['serial_number']},
+                    'gz_date': {'value': gz_date},
+                    'gz_nianyue': {'value': gz_nianyue},
+                    'customer_code': {'value': customer_code},
+                    'customer_name': {'value': customer_name},
+                    'sx_years_code': {'value': sx_years_code},
+                    'reward_method': {'value': '自销量奖励'},
+                    'total_self_sales': {'value': whi.data['total_self_sales']},
+                    'balance_payment': {'value': whi.data['balance_payment']},
 
+                }
                 if whi.data['self_sales_subform']:
                     self_sales = whi.data['self_sales_subform'][0]
-
                     subform = [
                         {
                             '_id': '60bf5e3456262300083b2001',
@@ -172,80 +186,23 @@ async def business(whi):
                             's_zxljl': None
                         },
                     ]
-                    data = {
-                        'serial_number': {'value': whi.data['serial_number']},
-                        'gz_date': {'value': gz_date},
-                        'gz_nianyue': {'value': gz_nianyue},
-                        'customer_code': {'value': customer_code},
-                        'customer_name': {'value': customer_name},
-                        'sx_years_code': {'value': sx_years_code},
-                        'reward_method': {'value': '自销量奖励'},
-                        'total_self_sales': {'value': whi.data['total_self_sales']},
-                        'self_sales_subform': JdySerialize.subform('self_sales_subform', subform)['self_sales_subform'],
-                    }
-                    _, err = await jdy.query_update_data_one(
-                        data_filter={
-                            "cond": [
-                                {
-                                    "field": 'serial_number',
-                                    "method": "eq",
-                                    "value": whi.data['serial_number']  # 唯一值
-                                },
-                            ],
-                        },
-                        data=data,
-                        non_existent_create=True,
-                        is_start_workflow=True
-                    )
-                    await errFn(err)
-
-        # 生成主表 客户实销量核对过渡表
-        for v in b_subform:
-            data = {
-                'b_wyz': {'value': v['b_wyz']},
-                'gz_date': {'value': gz_date},
-                'gz_nianyue': {'value': gz_nianyue},
-                'sx_years_code': {'value': sx_years_code},
-                'customer_code': {'value': customer_code},
-                'customer_name': {'value': customer_name},
-                'subtotal': {'value': v['b_15']},
-                'total_sales': {'value': total_sales},
-                'b_person': {'value': JdySerialize.member_err_to_none(v, 'b_person')},
-                'b_person_name': {'value': v['b_person_name']},
-                'b_person_no': {'value': v['b_person_no']},
-                'b_nianyuegh': {'value': v['b_nianyuegh']},
-                'b_gzjb': {'value': v['b_gzjb']},
-                'b_1': {'value': v['b_1']},
-                'b_2': {'value': v['b_2']},
-                'b_3': {'value': v['b_3']},
-                'b_4': {'value': v['b_4']},
-                'b_5': {'value': v['b_5']},
-                'b_6': {'value': v['b_6']},
-                'b_7': {'value': v['b_7']},
-                'b_8': {'value': v['b_8']},
-                'b_9': {'value': v['b_9']},
-                'b_10': {'value': v['b_10']},
-                'b_11': {'value': v['b_11']},
-                'b_12': {'value': v['b_12']},
-                'b_13': {'value': v['b_13']},
-                'b_14': {'value': v['b_14']},
-            }
-
-            res, err = await jdy.query_update_data_one(
-                data_filter={
-                    "cond": [
-                        {
-                            "field": 'b_wyz',
-                            "type": 'text',
-                            "method": "eq",
-                            "value": v['b_wyz']  # 唯一值
-                        },
-                    ],
-                },
-                data=data,
-                non_existent_create=True,
-            )
-            await errFn(err)
+                    data['self_sales_subform'] = JdySerialize.subform('self_sales_subform', subform)[
+                        'self_sales_subform']
+                _, err = await jdy.query_update_data_one(
+                    data_filter={
+                        "cond": [
+                            {
+                                "field": 'serial_number',
+                                "method": "eq",
+                                "value": whi.data['serial_number']  # 唯一值
+                            },
+                        ],
+                    },
+                    data=data,
+                    non_existent_create=True,
+                    is_start_workflow=True
+                )
+                await errFn(err)
 
     # 结束时间
     elapsed = (time.perf_counter() - start)

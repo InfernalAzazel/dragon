@@ -6,7 +6,7 @@ from loguru import logger
 
 from func.jd_web_hook.models import WebHookItem
 from conf import Settings
-from yetai import JDSDK, JDSerialize
+from robak import Jdy, JdySerialize
 
 doc = '''
     补客户业代提成差额申请 -> 流程完成 -> 触发
@@ -22,7 +22,7 @@ def register(router: APIRouter):
     @router.post('/repair_customer_c_d_apply', tags=['补客户业代提成差额申请-U8应收单过渡表'], description=doc)
     async def repair_customer_c_d_apply(whi: WebHookItem, req: Request, background_tasks: BackgroundTasks):
         # 验证签名
-        if req.headers['x-jdy-signature'] != JDSDK.get_signature(
+        if req.headers['x-jdy-signature'] != Jdy.get_signature(
                 nonce=req.query_params['nonce'],
                 secret=Settings.JD_SECRET,
                 timestamp=req.query_params['timestamp'],
@@ -34,17 +34,23 @@ def register(router: APIRouter):
 
 
 # 处理业务
-async def business(whi):
+async def business(whi: WebHookItem, url):
     async def errFn(e):
         if e is not None:
-            print(e)
+            await Settings.log.send(
+                level=Settings.log.ERROR,
+                url=url,
+                secret=Settings.JD_SECRET,
+                err=e,
+                data=whi.dict()
+            )
             return
 
     # 启动时间
     start = time.perf_counter()
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
-        jdy = JDSDK(
+        jdy = Jdy(
             app_id=Settings.JD_APP_ID_BUSINESS,
             entry_id='5facec6b40e1cb00079e03cb',
             api_key=Settings.JD_API_KEY,
@@ -101,7 +107,7 @@ async def business(whi):
                             'qujili_u8_code': {'value': qujili_u8_code},
                             'zhuguan_no': {'value': zhuguan_no},
                             'abstract': {'value': abstract},
-                            'receivable': JDSerialize.subform('receivable', subform)['receivable'],
+                            'receivable': JdySerialize.subform('receivable', subform)['receivable'],
                         })
                     await errFn(err)
                 else:
@@ -118,7 +124,7 @@ async def business(whi):
                             'qujili_u8_code': {'value': qujili_u8_code},
                             'zhuguan_no': {'value': zhuguan_no},
                             'abstract': {'value': abstract},
-                            'receivable': JDSerialize.subform('receivable', subform)['receivable'],
+                            'receivable': JdySerialize.subform('receivable', subform)['receivable'],
                         },
                         is_start_workflow=True
                     )
