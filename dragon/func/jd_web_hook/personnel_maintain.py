@@ -42,8 +42,9 @@ async def business(whi: WebHookItem, url):
                 data=whi.dict()
             )
             return
+
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
 
     jd = Jdy(
         app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,

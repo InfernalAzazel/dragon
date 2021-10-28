@@ -55,7 +55,7 @@ async def business(whi: WebHookItem, url):
             return
 
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
     # 入职申请表单
     entry_application_form = Jdy(
         app_id=Settings.JD_APP_ID_MINISTRY_OF_PERSONNEL,

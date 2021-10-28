@@ -41,7 +41,7 @@ async def business(whi: WebHookItem, url):
             )
             return
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
     # 流程完成
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
 

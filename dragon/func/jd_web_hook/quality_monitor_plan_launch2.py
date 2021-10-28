@@ -44,7 +44,7 @@ async def business(whi: WebHookItem, url):
             return
 
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
     # 异步模式-使用简道云接口 单表单
     asy_jd = Jdy(
         app_id=Settings.JD_APP_ID_QUALITY,

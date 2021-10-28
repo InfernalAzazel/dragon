@@ -7,7 +7,7 @@ import router.index
 def create_app():
     apps = FastAPI(
         title="腾龙",
-        description="简道云 u8 企业微信 交互 服务器",
+        description="简道云服务器",
         version="stable 0.1.1",
         docs_url="/docs",  # 自定义文档地址
         openapi_url="/openapi.json",  #

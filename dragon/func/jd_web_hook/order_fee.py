@@ -43,8 +43,9 @@ async def business(whi: WebHookItem, url):
                 data=whi.dict()
             )
             return
+
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
 
     if whi.data['flowState'] == 1 and whi.op == 'data_update':
         if whi.data['surplus_count'] == 0 or whi.data['actual_count'] == 0:

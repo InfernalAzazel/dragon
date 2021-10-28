@@ -44,8 +44,9 @@ async def business(whi: WebHookItem, url):
                 data=whi.dict()
             )
             return
+
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
 
     if whi.op == 'data_create':
 

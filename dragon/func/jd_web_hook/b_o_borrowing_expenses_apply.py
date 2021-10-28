@@ -53,7 +53,7 @@ async def business(whi: WebHookItem, url):
             return
 
     # 启动时间
-    start = time.perf_counter()
+    start = Settings.log.start_time()
 
     borrow_time = datetime.strptime(whi.data['updateTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
     borrow_years = f'{borrow_time.year}{borrow_time.month}'
