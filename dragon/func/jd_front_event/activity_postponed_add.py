@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel, Field
 from conf import Settings
 from robak import Jdy
@@ -17,10 +17,10 @@ doc = '''
 
 def register(router: APIRouter):
     @router.post('/activity-postponed-add', tags=['活动延期申请-获取活动已延期累计'], description=doc)
-    async def activity_postponed_add(item: Item, token: Optional[str] = Header(None)):
+    async def activity_postponed_add(item: Item, req: Request, token: Optional[str] = Header(None)):
         async def errFn(e):
             if e is not None:
-                print(e)
+                Settings.log.print(name=str(req.url), info=e)
                 return
         if token != Settings.DRAGON_TOKEN:
             return 'fail', 401

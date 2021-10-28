@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel, Field
 from conf import Settings
 from robak import Jdy
@@ -32,11 +32,12 @@ doc = '''
 
 def register(router: APIRouter):
     @router.post('/r_a_d_reward_apply', tags=['补指定开发奖励申请-门店档案1~6的数据'], description=doc)
-    async def leave_apply(inputs: Inputs, token: Optional[str] = Header(None)):
+    async def leave_apply(inputs: Inputs, req: Request, token: Optional[str] = Header(None)):
         async def errFn(e):
             if e is not None:
-                print(e)
+                Settings.log.print(name=str(req.url), info=e)
                 return
+
         if token != Settings.DRAGON_TOKEN:
             return 'fail', 401
         jdy = Jdy.auto_init(

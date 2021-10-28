@@ -25,7 +25,7 @@ def register(router: APIRouter):
             return 'fail', 401
 
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
 
         return '2xx'
 

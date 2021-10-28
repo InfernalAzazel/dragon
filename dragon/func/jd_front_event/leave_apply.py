@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel, Field
 from conf import Settings
 from robak import Jdy
@@ -25,10 +25,10 @@ doc = '''
 
 def register(router: APIRouter):
     @router.post('/leave-apply/get-flow-state-is-ongoing', tags=['请假申请表单-获取流程进行中状态'], description=doc)
-    async def leave_apply(inputs: Inputs, token: Optional[str] = Header(None)):
+    async def leave_apply(inputs: Inputs, req: Request, token: Optional[str] = Header(None)):
         async def errFn(e):
             if e is not None:
-                print(e)
+                Settings.log.print(name=str(req.url), info=e)
                 return
         if token != Settings.DRAGON_TOKEN:
             return 'fail', 401

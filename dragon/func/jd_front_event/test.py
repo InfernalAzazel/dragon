@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, Request
 from pydantic import BaseModel, Field
 
 from conf import Settings
@@ -21,7 +21,4 @@ def register(router: APIRouter):
     async def test(item: Item, token: Optional[str] = Header(None)):
         if token != Settings.DRAGON_TOKEN:
             return 'fail', 401
-
-        print(item.a)
-
-        return
+        return item

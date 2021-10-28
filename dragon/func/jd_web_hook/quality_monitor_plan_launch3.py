@@ -36,7 +36,7 @@ def register(router: APIRouter):
                 payload=bytes(await req.body()).decode('utf-8')):
             return 'fail', 401
         # 添加任务
-        background_tasks.add_task(business, whi)
+        background_tasks.add_task(business, whi, str(req.url))
 
         return '2xx'
 
