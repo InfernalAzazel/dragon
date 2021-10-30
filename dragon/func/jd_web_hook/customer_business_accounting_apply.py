@@ -41,18 +41,19 @@ async def business(whi: WebHookItem, url):
                 url=url,
                 secret=Settings.JD_SECRET,
                 err=e,
-                data=whi.dict()
+                data=whi.dict(),
+                is_start_workflow=True
             )
             return
 
     # 启动时间
     start = Settings.log.start_time()
 
-    if whi.data['flowState'] == 0 and whi.op == 'data_update':
+    if whi.data['flowState'] == 1 and whi.op == 'data_update':
         if whi.data['money'] is None:
             pass
         else:
-            if whi.data['money'] > 1 and whi.data['tb_u8'] == '是':
+            if whi.data['money'] > 0 and whi.data['tb_u8'] == '是':
                 jdy = Jdy(
                     app_id=Settings.JD_APP_ID_BUSINESS,
                     entry_id='5facec6b40e1cb00079e03cb',

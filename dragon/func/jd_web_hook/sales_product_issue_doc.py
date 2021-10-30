@@ -41,7 +41,8 @@ async def business(whi: WebHookItem, url):
                 url=url,
                 secret=Settings.JD_SECRET,
                 err=e,
-                data=whi.dict()
+                data=whi.dict(),
+                is_start_workflow=True
             )
             return
 
@@ -88,5 +89,4 @@ async def business(whi: WebHookItem, url):
             await errFn(err)
 
     # 结束时间
-    elapsed = (time.perf_counter() - start)
-    logger.info(f'[+] 程序处理耗时 {elapsed}s')
+    Settings.log.print(name=url, info=f'程序处理耗时 {Settings.log.elapsed(start)}s')

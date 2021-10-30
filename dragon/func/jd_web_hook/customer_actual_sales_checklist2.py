@@ -45,7 +45,8 @@ async def business(whi: WebHookItem, url):
                 url=url,
                 secret=Settings.JD_SECRET,
                 err=e,
-                data=whi.dict()
+                data=whi.dict(),
+                is_start_workflow=True
             )
             return
 

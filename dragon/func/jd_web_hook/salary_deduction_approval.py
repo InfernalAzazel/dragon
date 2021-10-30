@@ -1,11 +1,8 @@
-import time
-
 from fastapi import APIRouter, Request, BackgroundTasks
-from loguru import logger
-
-from func.jd_web_hook.models import WebHookItem
-from conf import Settings
 from robak import Jdy, JdySerialize
+
+from conf import Settings
+from func.jd_web_hook.models import WebHookItem
 
 doc = '''
     
@@ -41,7 +38,8 @@ async def business(whi: WebHookItem, url):
                 url=url,
                 secret=Settings.JD_SECRET,
                 err=e,
-                data=whi.dict()
+                data=whi.dict(),
+                is_start_workflow=True
             )
             return
 
@@ -136,5 +134,4 @@ async def business(whi: WebHookItem, url):
             await errFn(err)
 
     # 结束时间
-    elapsed = (time.perf_counter() - start)
-    logger.info(f'[+] 程序处理耗时 {elapsed}s')
+    Settings.log.print(name=url, info=f'程序处理耗时 {Settings.log.elapsed(start)}s')
