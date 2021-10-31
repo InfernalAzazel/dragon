@@ -9,7 +9,7 @@ from func.jd_web_hook.models import WebHookItem
 from conf import Settings
 
 doc = '''
-    营业所借支费用申请
+    营业所借支费用申请 - 提交或者修改 -> 触发
     
     流程完成 
     

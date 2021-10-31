@@ -10,6 +10,10 @@ from conf import Settings
 doc = '''
 
    省外直营业代工资（新版）
+   
+   条件
+   
+   是否已提供银行账号 == 否/修改
 
 '''
 

@@ -9,7 +9,9 @@ from conf import Settings
 
 doc = '''
 
-   业代净增加人员奖励
+   业代净增加人员奖励 -> 流程完成 -> 触发
+   
+   没有特殊条件
 
 '''
 

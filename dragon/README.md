@@ -9,19 +9,19 @@
 
 ```angular2html
 
-vmware-hgfsclient github # 挂载共享文件
+1. vmware-hgfsclient github # 挂载共享文件
 
-/usr/bin/vmhgfs-fuse .host:/ /mnt/hgfs -o subtype=vmhgfs-fuse,allow_other
+2. /usr/bin/vmhgfs-fuse .host:/ /mnt/hgfs -o subtype=vmhgfs-fuse,allow_other
 
-netstat -apn  | grep 8083 # 查看指定占用端口
+3. netstat -apn  | grep 8083 # 查看指定占用端口
 
-如果是后台程序，你用 ps aux | grep 进程名字。然后找到pid , 然后 kill -9 pid
+4. 如果是后台程序，你用 ps aux | grep 进程名字。然后找到pid , 然后 kill -9 pid
 
-cd /mnt/hgfs/github
+5. cd /mnt/hgfs/github
 
-部署
+6. gunicorn main:fast_app -b 0.0.0.0:6666  -w 4 -k uvicorn.workers.UvicornH11Worker --daemon
 
-gunicorn main:fast_app -b 0.0.0.0:6666  -w 4 -k uvicorn.workers.UvicornH11Worker --daemon
+# 以下可选部署
 
 nohup python3.9 main.py>/dev/null 2>&1 &
 

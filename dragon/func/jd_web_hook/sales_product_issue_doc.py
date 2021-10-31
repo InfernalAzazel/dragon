@@ -1,10 +1,8 @@
-import time
-
 from fastapi import APIRouter, Request, BackgroundTasks
-from loguru import logger
-from func.jd_web_hook.models import WebHookItem
-from conf import Settings
 from robak import Jdy, JdySerialize
+
+from conf import Settings
+from func.jd_web_hook.models import WebHookItem
 
 doc = '''
 
@@ -13,6 +11,10 @@ doc = '''
     创建数据
     
     营销_产品出库总表
+    
+    条件
+    
+    出库数量合计 不等于 0
 
 '''
 

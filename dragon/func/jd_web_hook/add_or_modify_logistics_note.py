@@ -8,7 +8,9 @@ from conf import Settings
 from robak import Jdy
 
 doc = '''
-    新增或修改物流备忘录
+    新增或修改物流备忘录 流程完成 -> 触发
+    
+    没有特殊条件
 
 '''
 
